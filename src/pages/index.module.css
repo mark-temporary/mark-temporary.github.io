@@ -21,3 +21,55 @@
   align-items: center;
   justify-content: center;
 }
+
+.iframeWrapper {
+  width: 100%;
+  height: 60vh;
+}
+
+@media screen and (min-width: 1200px) {
+  .scunkIframe {
+  width: 960px;
+  height: 720px;
+  border: none;
+  }
+  .iframeWrapper {
+    margin-bottom: 8em;
+  }
+}
+
+@media screen and (min-width: 700px) and (max-width: 1199px) {
+  .scunkIframe {
+  width: 640px;
+  height: 480px;
+  border: none;
+  }
+}
+
+@media screen and (max-width: 699px) {
+  .scunkIframe {
+    width: 320px;
+    height: 240px;
+    border: none;
+  }
+}
+
+/* Tablets */
+@media (max-width: 996px) {
+  .iframeWrapper {
+    height: 45vh;
+  }
+}
+
+@media (max-width: 996px) and (min-width: 700px) {
+  .iframeWrapper {
+    margin-bottom: 8em;
+  }
+} 
+
+/* Phones */
+@media (max-width: 600px) {
+  .iframeWrapper {
+    height: 30vh;
+  }
+}

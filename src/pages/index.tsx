@@ -17,16 +17,17 @@ function HomepageHeader() {
           {siteConfig.title}
         </Heading>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
-        <div style={{ height: '60vh' }}>
-          <iframe 
-            width="640"
-            height="480"
-            src="https://mark-temporary.github.io/SCUMM-Test/">
-          </iframe>
+        <div className={styles.iframeWrapper}>
+          <iframe
+            className={styles.scunkIframe}
+            src="https://mark-temporary.github.io/SCUMM-Test/"
+            title="SCUNK"
+          />
         </div>
       </div>
     </header>
   );
+
 }
 
 export default function Home(): ReactNode {
