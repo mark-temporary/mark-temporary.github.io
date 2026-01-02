@@ -19,8 +19,8 @@ function HomepageHeader() {
         <p className="hero__subtitle">{siteConfig.tagline}</p>
         <div style={{ height: '60vh' }}>
           <iframe 
-            width="50%"
-            height="90%"
+            width="640"
+            height="480"
             src="https://mark-temporary.github.io/SCUMM-Test/">
           </iframe>
         </div>
