@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkhappy_ferret_company=globalThis.webpackChunkhappy_ferret_company||[]).push([[903],{1912(e){e.exports=JSON.parse('{"blogBasePath":"/website/blog","blogTitle":"Blog","authorsListPath":"/website/blog/authors"}')}}]);
