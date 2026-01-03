@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xsl" href="atom.xsl"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://your-docusaurus-site.example.com/website/blog</id>
+    <id>https://your-docusaurus-site.example.com/blog</id>
     <title>Welcome to Happy Ferret Entertainment Blog</title>
     <updated>2026-01-01T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://your-docusaurus-site.example.com/website/blog"/>
+    <link rel="alternate" href="https://your-docusaurus-site.example.com/blog"/>
     <subtitle>Welcome to Happy Ferret Entertainment Blog</subtitle>
-    <icon>https://your-docusaurus-site.example.com/website/img/favicon.ico</icon>
+    <icon>https://your-docusaurus-site.example.com/img/favicon.ico</icon>
     <entry>
         <title type="html"><![CDATA[Welcome]]></title>
-        <id>https://your-docusaurus-site.example.com/website/blog/welcome</id>
-        <link href="https://your-docusaurus-site.example.com/website/blog/welcome"/>
+        <id>https://your-docusaurus-site.example.com/blog/welcome</id>
+        <link href="https://your-docusaurus-site.example.com/blog/welcome"/>
         <updated>2026-01-01T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[Welcome to the official home of Happy Ferret Entertainment]]></summary>
-        <content type="html"><![CDATA[<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="welcome-to-the-official-home-of-happy-ferret-entertainment">Welcome to the official home of Happy Ferret Entertainment<a href="https://your-docusaurus-site.example.com/website/blog/welcome#welcome-to-the-official-home-of-happy-ferret-entertainment" class="hash-link" aria-label="Direct link to Welcome to the official home of Happy Ferret Entertainment" title="Direct link to Welcome to the official home of Happy Ferret Entertainment" translate="no">​</a></h3>
+        <content type="html"><![CDATA[<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="welcome-to-the-official-home-of-happy-ferret-entertainment">Welcome to the official home of Happy Ferret Entertainment<a href="https://your-docusaurus-site.example.com/blog/welcome#welcome-to-the-official-home-of-happy-ferret-entertainment" class="hash-link" aria-label="Direct link to Welcome to the official home of Happy Ferret Entertainment" title="Direct link to Welcome to the official home of Happy Ferret Entertainment" translate="no">​</a></h3>
 <p>As of the time of writing, the website is still under heavy
 development.</p>
 <p>In the future, I hope to make this an excellent source for
