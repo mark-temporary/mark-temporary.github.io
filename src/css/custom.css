@@ -28,3 +28,12 @@
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+@media screen and (min-width: 1200px) {
+.hero__title {
+  font-size: 2rem;
+}
+.hero__subtitle {
+  font-size: 1rem;
+  }
+}

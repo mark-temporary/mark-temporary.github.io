@@ -34,7 +34,10 @@
   border: none;
   }
   .iframeWrapper {
-    margin-bottom: 8em;
+    margin-bottom: 16em;
+  }
+  .heroBanner {
+    padding: 0rem;
   }
 }
 
