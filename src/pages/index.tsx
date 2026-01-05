@@ -23,11 +23,16 @@ function HomepageHeader() {
             src="https://happy-ferret.com/SCUMM-Test/"
             title="SCUNK"
           />
+        <br/><button onClick={Fullscreen}>Fullscreen</button>
         </div>
       </div>
     </header>
   );
 
+}
+
+function Fullscreen() {
+  document.getElementsByClassName(styles.scunkIframe)[0].requestFullscreen()
 }
 
 export default function Home(): ReactNode {
