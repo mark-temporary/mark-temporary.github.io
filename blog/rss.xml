@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
     <channel>
         <title>Welcome to Happy Ferret Entertainment Blog</title>
-        <link>https://your-docusaurus-site.example.com/blog</link>
+        <link>https://happy-ferret.com/blog</link>
         <description>Welcome to Happy Ferret Entertainment Blog</description>
         <lastBuildDate>Thu, 01 Jan 2026 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
@@ -10,11 +10,11 @@
         <language>en</language>
         <item>
             <title><![CDATA[Welcome]]></title>
-            <link>https://your-docusaurus-site.example.com/blog/welcome</link>
-            <guid>https://your-docusaurus-site.example.com/blog/welcome</guid>
+            <link>https://happy-ferret.com/blog/welcome</link>
+            <guid>https://happy-ferret.com/blog/welcome</guid>
             <pubDate>Thu, 01 Jan 2026 00:00:00 GMT</pubDate>
             <description><![CDATA[Welcome to the official home of Happy Ferret Entertainment]]></description>
-            <content:encoded><![CDATA[<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="welcome-to-the-official-home-of-happy-ferret-entertainment">Welcome to the official home of Happy Ferret Entertainment<a href="https://your-docusaurus-site.example.com/blog/welcome#welcome-to-the-official-home-of-happy-ferret-entertainment" class="hash-link" aria-label="Direct link to Welcome to the official home of Happy Ferret Entertainment" title="Direct link to Welcome to the official home of Happy Ferret Entertainment" translate="no">​</a></h3>
+            <content:encoded><![CDATA[<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="welcome-to-the-official-home-of-happy-ferret-entertainment">Welcome to the official home of Happy Ferret Entertainment<a href="https://happy-ferret.com/blog/welcome#welcome-to-the-official-home-of-happy-ferret-entertainment" class="hash-link" aria-label="Direct link to Welcome to the official home of Happy Ferret Entertainment" title="Direct link to Welcome to the official home of Happy Ferret Entertainment" translate="no">​</a></h3>
 <p>As of the time of writing, the website is still under heavy
 development.</p>
 <p>In the future, I hope to make this an excellent source for
