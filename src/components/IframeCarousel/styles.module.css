@@ -1,0 +1,209 @@
+/* ============================================================
+   IframeCarousel — 3-D cylinder carousel
+   ============================================================ */
+
+/* ── Outer wrapper ────────────────────────────────────────────────────── */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0 0.5rem;
+  position: relative;
+}
+
+/* ── Stage ────────────────────────────────────────────────────────────── */
+/*
+  overflow: hidden clips the 3-D drum to the front window.
+  position: relative is the anchor for the fullscreen button overlay.
+  width/height/perspective are set via inline styles (dynamic).
+*/
+.stage {
+  position: relative;
+  cursor: grab;
+  overflow: hidden;
+  border: 2px solid var(--ifm-color-primary);
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 1px var(--ifm-color-primary-darker),
+    0 0 24px 4px color-mix(in srgb, var(--ifm-color-primary) 40%, transparent),
+    inset 0 0 40px rgba(0,0,0,0.5);
+}
+
+.stage:active { cursor: grabbing; }
+
+/* ── Drum ─────────────────────────────────────────────────────────────── */
+.drum {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  transform-style: preserve-3d;
+}
+
+/* ── Panel ────────────────────────────────────────────────────────────── */
+.panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  transition: opacity 300ms ease, filter 300ms ease;
+  opacity: 0.35;
+  filter: brightness(0.5);
+}
+
+.panelActive {
+  opacity: 1;
+  filter: brightness(1);
+}
+
+/* ── iframe ───────────────────────────────────────────────────────────── */
+.iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* ── Scanlines ────────────────────────────────────────────────────────── */
+.scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.08) 3px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  z-index: 2;
+}
+
+/* ── Vignette ─────────────────────────────────────────────────────────── */
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 55%,
+    rgba(0,0,0,0.55) 100%
+  );
+  z-index: 3;
+}
+
+/* ── Fullscreen button — bottom-right overlay inside the stage ────────── */
+/*
+  Lives inside .stage (position:relative) so it is clipped by overflow:hidden
+  and naturally sits above the vignette (z-index 4 > vignette z-index 3).
+  It appears on hover of the stage so it doesn't visually clutter the content.
+*/
+.fullscreenBtn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 4;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+
+  /* Hidden by default; revealed when the stage is hovered */
+  opacity: 0;
+  transition: opacity 200ms ease, background 150ms ease;
+}
+
+.stage:hover .fullscreenBtn,
+.stage:focus-within .fullscreenBtn {
+  opacity: 1;
+}
+
+.fullscreenBtn:hover {
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+}
+
+.fullscreenBtn:active {
+  transform: scale(0.92);
+}
+
+/* ── Arrow buttons ────────────────────────────────────────────────────── */
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 64px;
+  padding: 0;
+  border: 2px solid var(--ifm-color-primary);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--ifm-background-color) 85%, transparent);
+  color: var(--ifm-color-primary);
+  cursor: pointer;
+  transition: background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+  box-shadow: 0 0 0 0 transparent;
+}
+
+.arrowLeft  { left: -60px; }
+.arrowRight { right: -60px; }
+
+.arrow:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ifm-color-primary) 15%, var(--ifm-background-color));
+  box-shadow: 0 0 14px 2px color-mix(in srgb, var(--ifm-color-primary) 60%, transparent);
+}
+
+.arrow:active:not(:disabled) { transform: translateY(-50%) scale(0.93); }
+.arrow:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.arrowGlyph { font-size: 1.1rem; line-height: 1; }
+
+/* ── Dot indicators ───────────────────────────────────────────────────── */
+.dots {
+  display: flex;
+  gap: 10px;
+  margin-top: 0.25rem;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: 2px solid var(--ifm-color-primary);
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: background 200ms ease, box-shadow 200ms ease;
+}
+
+.dotActive {
+  background: var(--ifm-color-primary);
+  box-shadow: 0 0 8px 2px color-mix(in srgb, var(--ifm-color-primary) 70%, transparent);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .arrowLeft, .arrowRight { position: static; transform: none; }
+  .wrapper { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+  .stage { order: -1; flex: 0 0 100%; }
+  .dots { flex: 0 0 100%; justify-content: center; }
+  .arrow:active:not(:disabled) { transform: scale(0.93); }
+}

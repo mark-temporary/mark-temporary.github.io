@@ -1,48 +1,77 @@
-import type {ReactNode} from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useRef } from 'react';
 import clsx from 'clsx';
-import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
-import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Heading from '@theme/Heading';
+import HomepageFeatures from '@site/src/components/HomepageFeatures';
+import IframeCarousel from '@site/src/components/IframeCarousel';
 
 import styles from './index.module.css';
 
-function HomepageHeader() {
-  const {siteConfig} = useDocusaurusContext();
+// Carousel sources — add or reorder as needed
+const CAROUSEL_SRCS = [
+  'https://happy-ferret.com/SCUMM-Test/',
+  'https://happy-ferret.com/SCUMM-Test/',   // placeholder: swap for real game URLs
+  'https://happy-ferret.com/SCUMM-Test/',
+];
+
+function HomepageHeader(): ReactNode {
+  const { siteConfig } = useDocusaurusContext();
+  const headerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      headerRef.current?.classList.add('hf-hero-enter');
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   return (
-    <header className={clsx('hero hero--primary', styles.heroBanner)}>
+    <header
+      ref={headerRef}
+      className={clsx('hero hero--primary', styles.heroBanner)}
+    >
       <div className="container">
-        <Heading as="h1" className="hero__title">
+        <Heading as="h1" className={clsx('hero__title', 'hf-neon-title')}>
           {siteConfig.title}
         </Heading>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
-        <div className={styles.iframeWrapper}>
-          <iframe
-            className={styles.scunkIframe}
-            src="https://happy-ferret.com/SCUMM-Test/"
-            title="SCUNK"
+        <p className={clsx('hero__subtitle', 'hf-neon-tagline')}>
+          {siteConfig.tagline}
+        </p>
+
+        <div className={clsx('hf-hero-body', styles.iframeBody)}>
+          {/*
+            responsiveSizes replicates the original breakpoints exactly:
+              ≥1200px → 960×720 (4:3)
+               700–1199px → 640×480
+              <700px → 320×240
+            The fullscreen button is built into IframeCarousel and always
+            targets whichever iframe is currently active.
+          */}
+          <IframeCarousel
+            srcs={CAROUSEL_SRCS}
+            responsiveSizes={[
+              { minWidth: 1200, width: 960, height: 720 },
+              { minWidth: 700,  width: 640, height: 480 },
+              { minWidth: 0,    width: 320, height: 240 },
+            ]}
           />
-        <br/><button onClick={Fullscreen}>Fullscreen</button>
         </div>
       </div>
     </header>
   );
-
-}
-
-function Fullscreen() {
-  document.getElementsByClassName(styles.scunkIframe)[0].requestFullscreen()
 }
 
 export default function Home(): ReactNode {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
       title={`Hello from ${siteConfig.title}`}
-      description="Welcome to Happy Ferret Entertainment">
+      description="Welcome to Happy Ferret Entertainment"
+    >
       <HomepageHeader />
-      <main>
+      <main className="hf-main-enter">
         <HomepageFeatures />
       </main>
     </Layout>

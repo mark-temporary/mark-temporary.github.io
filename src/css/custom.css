@@ -1,10 +1,9 @@
 /**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+ * Global styles — Happy Ferret Entertainment
+ * Infima overrides + retro arcade entry animations + neon text effects.
  */
 
-/* You can override the default Infima variables here. */
+/* ── Infima brand tokens ──────────────────────────────────────────────── */
 :root {
   --ifm-color-primary: #2e8555;
   --ifm-color-primary-dark: #29784c;
@@ -15,9 +14,13 @@
   --ifm-color-primary-lightest: #3cad6e;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  /* Neon palette — green phosphor CRT */
+  --hf-neon-core:   #b6ffda;
+  --hf-neon-mid:    #3cad6e;
+  --hf-neon-outer:  #1a5c3a;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
   --ifm-color-primary: #25c2a0;
   --ifm-color-primary-dark: #21af90;
@@ -27,13 +30,249 @@
   --ifm-color-primary-lighter: #32d8b4;
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+  /* Teal phosphor variant in dark mode */
+  --hf-neon-core:  #ccfff6;
+  --hf-neon-mid:   #25c2a0;
+  --hf-neon-outer: #0e5c4a;
 }
 
 @media screen and (min-width: 1200px) {
-.hero__title {
-  font-size: 2rem;
+  .hero__title    { font-size: 2rem; }
+  .hero__subtitle { font-size: 1rem; }
 }
-.hero__subtitle {
-  font-size: 1rem;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CRT POWER-ON ANIMATION
+   ═══════════════════════════════════════════════════════════════════════════
+   Phases (total ~3 s):
+     0–5%   Dead black
+     5–9%   Horizontal zap — collapses to a 2-px sliver, blinding white flash
+     9–13%  Sliver holds, flickers twice
+    13–22%  Screen unrolls vertically from the sliver with bloom
+    22–35%  Desaturated phosphor green warmup (colour slowly bleeds in)
+    35–55%  Full colour, brightness settles, one subtle ghost flicker
+    55–100% Stable — slight residual hum (brightness pulse)
+*/
+
+@keyframes hf-crt-on {
+  /* Dead */
+  0%   {
+    opacity: 0;
+    filter: brightness(0) blur(0px) saturate(0) contrast(1);
+    transform: scaleY(1);
   }
+  /* Sudden electron-gun ignition: blinding white sliver */
+  5%   {
+    opacity: 1;
+    filter: brightness(8) blur(6px) saturate(0) contrast(3);
+    transform: scaleY(0.012);
+  }
+  /* Hold the sliver */
+  9%   {
+    opacity: 1;
+    filter: brightness(5) blur(3px) saturate(0) contrast(2);
+    transform: scaleY(0.012);
+  }
+  /* First flicker off */
+  10%  {
+    opacity: 0.1;
+    filter: brightness(0) blur(0) saturate(0) contrast(1);
+    transform: scaleY(0.012);
+  }
+  /* Flicker back on */
+  11%  {
+    opacity: 1;
+    filter: brightness(6) blur(4px) saturate(0) contrast(2);
+    transform: scaleY(0.012);
+  }
+  /* Second flicker */
+  12%  {
+    opacity: 0.2;
+    filter: brightness(0) blur(0) saturate(0) contrast(1);
+    transform: scaleY(0.012);
+  }
+  13%  {
+    opacity: 1;
+    filter: brightness(4) blur(2px) saturate(0) contrast(1.5);
+    transform: scaleY(0.012);
+  }
+  /* Screen unrolls — slight overshoot */
+  22%  {
+    opacity: 1;
+    filter: brightness(2.5) blur(1px) saturate(0) contrast(1.2);
+    transform: scaleY(1.04);
+  }
+  /* Settles — phosphor green warmup begins */
+  28%  {
+    opacity: 1;
+    filter: brightness(1.8) blur(0px) saturate(0.15) contrast(1.1);
+    transform: scaleY(1);
+  }
+  /* Colour slowly bleeds in */
+  40%  {
+    opacity: 1;
+    filter: brightness(1.4) blur(0) saturate(0.5) contrast(1.05);
+    transform: scaleY(1);
+  }
+  /* Ghost scan — a horizontal streak sweeps down */
+  50%  {
+    opacity: 0.92;
+    filter: brightness(1.2) blur(0) saturate(0.8) contrast(1);
+    transform: scaleY(1);
+  }
+  55%  {
+    opacity: 1;
+    filter: brightness(1) blur(0) saturate(1) contrast(1);
+    transform: scaleY(1);
+  }
+  /* Residual hum — gentle brightness pulse */
+  70%  {
+    opacity: 1;
+    filter: brightness(1.05) blur(0) saturate(1) contrast(1);
+    transform: scaleY(1);
+  }
+  85%  {
+    opacity: 1;
+    filter: brightness(0.97) blur(0) saturate(1) contrast(1);
+    transform: scaleY(1);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1) blur(0) saturate(1) contrast(1);
+    transform: scaleY(1);
+  }
+}
+
+.hf-hero-enter {
+  animation: hf-crt-on 3s cubic-bezier(0.23, 1, 0.32, 1) both;
+  transform-origin: center center;
+}
+
+/* ── CRT scanline overlay on the hero ────────────────────────────────── */
+.hf-hero-enter::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.07) 2px,
+    rgba(0, 0, 0, 0.07) 3px
+  );
+  z-index: 10;
+}
+
+/* ── Staggered slide-up for hero text / body ─────────────────────────── */
+@keyframes hf-slide-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* Title appears at ~1.8 s (after the screen has unrolled) */
+.hf-hero-enter .hf-neon-title {
+  animation: hf-slide-up 0.7s ease both;
+  animation-delay: 1.8s;
+}
+
+/* Tagline at ~2.1 s */
+.hf-hero-enter .hf-neon-tagline {
+  animation: hf-slide-up 0.7s ease both;
+  animation-delay: 2.1s;
+}
+
+/* iframe body at ~2.4 s */
+.hf-hero-enter .hf-hero-body {
+  animation: hf-slide-up 0.8s ease both;
+  animation-delay: 2.4s;
+}
+
+/* ── Main content fade ────────────────────────────────────────────────── */
+@keyframes hf-fade-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hf-main-enter {
+  animation: hf-fade-in 0.9s ease both;
+  animation-delay: 2.9s;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NEON TEXT — TITLE
+   The text itself stays the hero's default colour (near-black on light,
+   near-white on dark). Only the text-shadow layers produce the neon halo —
+   no color: override so the letterforms remain readable.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.hf-neon-title {
+  text-shadow:
+    /* Tight inner bloom */
+    0 0  4px var(--hf-neon-core),
+    0 0 10px var(--hf-neon-core),
+    /* Mid-range glow */
+    0 0 20px var(--hf-neon-mid),
+    0 0 35px var(--hf-neon-mid),
+    /* Wide diffuse halo */
+    0 0 55px var(--hf-neon-outer),
+    0 0 80px var(--hf-neon-outer);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NEON TEXT — TAGLINE (animated flicker)
+   Same approach — no color: override, glow via text-shadow only.
+   The keyframe animates between strong-glow and dim-glow states.
+
+   Timing note: the tagline slides in at animation-delay 2.1s (from
+   hf-slide-up).  The flicker starts at 3s so it begins ~0.9s after the
+   element finishes appearing.  animation-fill-mode: backwards keeps the
+   element invisible before the slide-up fires; we can't use `both` here
+   because that would apply the keyframe's 0% state before the delay and
+   make the text invisible until 3s.  Instead we layer the animations:
+   hf-slide-up handles visibility, hf-neon-flicker handles the glow.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes hf-neon-flicker {
+  /* Fully lit */
+  0%   { text-shadow: 0 0  4px var(--hf-neon-core), 0 0 10px var(--hf-neon-core), 0 0 20px var(--hf-neon-mid), 0 0 40px var(--hf-neon-outer); opacity: 1;    }
+  /* Small dip */
+  4%   { text-shadow: 0 0  2px var(--hf-neon-core), 0 0  5px var(--hf-neon-core), 0 0  9px var(--hf-neon-mid), 0 0 16px var(--hf-neon-outer); opacity: 0.85; }
+  5%   { text-shadow: 0 0  4px var(--hf-neon-core), 0 0 10px var(--hf-neon-core), 0 0 20px var(--hf-neon-mid), 0 0 40px var(--hf-neon-outer); opacity: 1;    }
+  /* Steady hum */
+  18%  { text-shadow: 0 0  4px var(--hf-neon-core), 0 0 10px var(--hf-neon-core), 0 0 20px var(--hf-neon-mid), 0 0 40px var(--hf-neon-outer); opacity: 1;    }
+  /* Double-flicker */
+  19%  { text-shadow: 0 0  1px var(--hf-neon-core), 0 0  3px var(--hf-neon-core), 0 0  5px var(--hf-neon-mid), 0 0  8px var(--hf-neon-outer); opacity: 0.7;  }
+  20%  { text-shadow: 0 0  4px var(--hf-neon-core), 0 0 10px var(--hf-neon-core), 0 0 20px var(--hf-neon-mid), 0 0 40px var(--hf-neon-outer); opacity: 1;    }
+  21%  { text-shadow: 0 0  1px var(--hf-neon-core), 0 0  3px var(--hf-neon-core), 0 0  5px var(--hf-neon-mid), 0 0  8px var(--hf-neon-outer); opacity: 0.75; }
+  22%  { text-shadow: 0 0  4px var(--hf-neon-core), 0 0 10px var(--hf-neon-core), 0 0 20px var(--hf-neon-mid), 0 0 40px var(--hf-neon-outer); opacity: 1;    }
+  /* Long steady section with gentle swell */
+  50%  { text-shadow: 0 0  5px var(--hf-neon-core), 0 0 12px var(--hf-neon-core), 0 0 24px var(--hf-neon-mid), 0 0 48px var(--hf-neon-outer); opacity: 1;    }
+  /* Near-blackout — tube really struggles */
+  58%  { text-shadow: none; opacity: 0.12; }
+  59%  { text-shadow: 0 0  4px var(--hf-neon-core), 0 0 10px var(--hf-neon-core), 0 0 20px var(--hf-neon-mid), 0 0 40px var(--hf-neon-outer); opacity: 1;    }
+  60%  { text-shadow: none; opacity: 0.25; }
+  61%  { text-shadow: 0 0  4px var(--hf-neon-core), 0 0 10px var(--hf-neon-core), 0 0 20px var(--hf-neon-mid), 0 0 40px var(--hf-neon-outer); opacity: 1;    }
+  /* Finish with a warm glow swell */
+  82%  { text-shadow: 0 0  6px var(--hf-neon-core), 0 0 14px var(--hf-neon-core), 0 0 28px var(--hf-neon-mid), 0 0 55px var(--hf-neon-outer); opacity: 1;    }
+  100% { text-shadow: 0 0  4px var(--hf-neon-core), 0 0 10px var(--hf-neon-core), 0 0 20px var(--hf-neon-mid), 0 0 40px var(--hf-neon-outer); opacity: 1;    }
+}
+
+.hf-neon-tagline {
+  /* Apply glow immediately (before the flicker animation takes over) */
+  text-shadow:
+    0 0  4px var(--hf-neon-core),
+    0 0 10px var(--hf-neon-core),
+    0 0 20px var(--hf-neon-mid),
+    0 0 40px var(--hf-neon-outer);
+  /*
+    Start the flicker 3s after page load (the element finishes sliding in
+    at ~2.8s, so there's a brief moment of steady glow before it starts).
+    animation-fill-mode: none — we don't want the keyframe to control
+    opacity before the delay; the slide-up animation owns that.
+  */
+  animation: hf-neon-flicker 6s ease-in-out infinite;
+  animation-delay: 3s;
+  animation-fill-mode: none;
 }
