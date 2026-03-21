@@ -4,38 +4,28 @@
   text-align: center;
   position: relative;
   overflow: hidden;
+  /* Ensure the Infima primary background is fully transparent so the
+     parallax art shows through. The original hero--primary sets a solid
+     background — we override it to let our scene through. */
+  background: transparent !important;
 }
 
 @media screen and (max-width: 996px) {
   .heroBanner { padding: 2rem; }
 }
 
-/* ── iframe wrapper — contains carousel + fullscreen button ───────────── */
+/* ── Hero container — sits above the parallax (z-index 1) ────────────── */
+.heroBanner .container,
+.heroBanner > .container {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── iframe wrapper ───────────────────────────────────────────────────── */
 .iframeBody {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  /* Extra bottom margin so arrows don't clip into HomepageFeatures */
   margin-bottom: 2rem;
-}
-
-/* Fullscreen button — retro outlined style */
-.fullscreenBtn {
-  display: inline-block;
-  padding: 0.35rem 1.2rem;
-  border: 2px solid var(--ifm-color-primary);
-  border-radius: 3px;
-  background: transparent;
-  color: var(--ifm-color-primary);
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 150ms ease, box-shadow 150ms ease;
-}
-
-.fullscreenBtn:hover {
-  background: color-mix(in srgb, var(--ifm-color-primary) 12%, transparent);
-  box-shadow: 0 0 10px 1px color-mix(in srgb, var(--ifm-color-primary) 50%, transparent);
 }

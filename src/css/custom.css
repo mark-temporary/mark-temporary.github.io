@@ -208,6 +208,8 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .hf-neon-title {
+  /* Light mode: white text so the neon glow reads clearly against the sky */
+  color: #ffffff;
   text-shadow:
     /* Tight inner bloom */
     0 0  4px var(--hf-neon-core),
@@ -218,6 +220,11 @@
     /* Wide diffuse halo */
     0 0 55px var(--hf-neon-outer),
     0 0 80px var(--hf-neon-outer);
+}
+
+[data-theme='dark'] .hf-neon-title {
+  /* Dark mode: black text against the dark hero background */
+  color: #1c1e21;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -260,19 +267,20 @@
 }
 
 .hf-neon-tagline {
+  /* Light mode: white text */
+  color: #1c1e21;
   /* Apply glow immediately (before the flicker animation takes over) */
   text-shadow:
     0 0  4px var(--hf-neon-core),
     0 0 10px var(--hf-neon-core),
     0 0 20px var(--hf-neon-mid),
     0 0 40px var(--hf-neon-outer);
-  /*
-    Start the flicker 3s after page load (the element finishes sliding in
-    at ~2.8s, so there's a brief moment of steady glow before it starts).
-    animation-fill-mode: none — we don't want the keyframe to control
-    opacity before the delay; the slide-up animation owns that.
-  */
   animation: hf-neon-flicker 6s ease-in-out infinite;
   animation-delay: 3s;
   animation-fill-mode: none;
+}
+
+[data-theme='dark'] .hf-neon-tagline {
+  /* Dark mode: black text */
+  color: #ffffff;
 }

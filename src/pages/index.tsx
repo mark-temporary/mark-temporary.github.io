@@ -6,6 +6,7 @@ import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import IframeCarousel from '@site/src/components/IframeCarousel';
+import ParallaxBackground from '@site/src/components/ParallaxBackground';
 
 import styles from './index.module.css';
 
@@ -32,6 +33,9 @@ function HomepageHeader(): ReactNode {
       ref={headerRef}
       className={clsx('hero hero--primary', styles.heroBanner)}
     >
+      {/* Parallax pixel-art cityscape — rendered behind all content */}
+      <ParallaxBackground />
+
       <div className="container">
         <Heading as="h1" className={clsx('hero__title', 'hf-neon-title')}>
           {siteConfig.title}

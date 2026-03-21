@@ -1,0 +1,203 @@
+/* ============================================================
+   ParallaxBackground styles
+   ============================================================ */
+
+/* ── Root container — fills its parent absolutely ────────────────────── */
+.root {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  
+  /* ── SVG fills the container ─────────────────────────────────────────── */
+  .svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  
+  /* ── Parallax layers ──────────────────────────────────────────────────── */
+  .layer {
+    will-change: transform;
+    /* GPU-composited layer, no layout thrash */
+  }
+  
+  /* ── Star twinkle animations ──────────────────────────────────────────── */
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.9; }
+    50%       { opacity: 0.2; }
+  }
+  
+  @keyframes twinkleSlow {
+    0%, 100% { opacity: 0.7; }
+    50%       { opacity: 0.1; }
+  }
+  
+  .starTwinkle {
+    animation: twinkle 2.4s ease-in-out infinite;
+  }
+  
+  .starTwinkleSlow {
+    animation: twinkleSlow 4.1s ease-in-out infinite;
+  }
+  
+  /* ── Antenna blink ───────────────────────────────────────────────────── */
+  @keyframes blinkRed {
+    0%, 48%, 52%, 100% { opacity: 1;   }
+    50%                 { opacity: 0.1; }
+  }
+  
+  .blinkRed {
+    animation: blinkRed 2s step-end infinite;
+  }
+  
+  /* ── Window flicker variants ─────────────────────────────────────────── */
+  /* Three variants with different cadences so windows flicker independently */
+  @keyframes winFlicker {
+    0%, 91%, 95%, 97%, 100% { opacity: 0.75; }
+    93%                      { opacity: 0.15; }
+    96%                      { opacity: 0.6;  }
+  }
+  @keyframes winFlickerB {
+    0%, 60%, 63%, 100% { opacity: 0.7; }
+    61%                { opacity: 0.1; }
+    62%                { opacity: 0.5; }
+  }
+  @keyframes winFlickerC {
+    0%, 30%, 32%, 34%, 100% { opacity: 0.8; }
+    31%                      { opacity: 0.0; }
+    33%                      { opacity: 0.4; }
+  }
+  
+  .winFlicker  { animation: winFlicker  7.0s ease-in-out infinite; }
+  .winFlickerB { animation: winFlickerB 5.3s ease-in-out infinite; }
+  .winFlickerC { animation: winFlickerC 9.1s ease-in-out infinite; }
+  
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEON SIGN ANIMATIONS — each sign has its own personality.
+     The HF keyframe is also used verbatim by the turtle face overlay so
+     they stay perfectly in lockstep (same name, same duration, same easing).
+     ═══════════════════════════════════════════════════════════════════════ */
+  
+  /* HF — aggressive triple-flicker then long rest */
+  @keyframes neonHF {
+    0%,  3%  { opacity: 1;    }
+    4%        { opacity: 0.05; }   /* sharp cut */
+    5%        { opacity: 1;    }
+    6%        { opacity: 0.1;  }   /* second cut */
+    7%        { opacity: 1;    }
+    8%        { opacity: 0.4;  }   /* weak recovery */
+    10%       { opacity: 1;    }
+    /* long stable burn */
+    70%       { opacity: 1;    }
+    71%       { opacity: 0.0;  }   /* total blackout */
+    72%       { opacity: 0.9;  }
+    73%       { opacity: 0.0;  }
+    75%       { opacity: 1;    }
+    100%      { opacity: 1;    }
+  }
+  
+  /* 24H — slow heartbeat double-pulse */
+  @keyframes neon24H {
+    0%,  15% { opacity: 1;    }
+    16%       { opacity: 0.55; }
+    20%       { opacity: 1;    }
+    22%       { opacity: 0.5;  }
+    26%       { opacity: 1;    }
+    /* long off-beat rest */
+    100%      { opacity: 1;    }
+  }
+  
+  /* GAME — rapid strobe then fade */
+  @keyframes neonGame {
+    0%,  5%  { opacity: 1;   }
+    6%        { opacity: 0.2; }
+    7%        { opacity: 1;   }
+    8%        { opacity: 0.2; }
+    9%        { opacity: 1;   }
+    10%       { opacity: 0.2; }
+    11%       { opacity: 1;   }
+    40%       { opacity: 0.8; }   /* gentle sag */
+    50%       { opacity: 1;   }
+    100%      { opacity: 1;   }
+  }
+  
+  /* OPEN — one stutter then long stable */
+  @keyframes neonOpen {
+    0%, 55%  { opacity: 1;    }
+    56%       { opacity: 0.0;  }  /* hard off */
+    57%       { opacity: 0.85; }
+    58%       { opacity: 0.0;  }
+    60%       { opacity: 1;    }
+    100%      { opacity: 1;    }
+  }
+  
+  .neonHF   { animation: neonHF   6.0s ease-in-out infinite; }
+  .neon24H  { animation: neon24H  8.5s ease-in-out infinite; animation-delay: -2.1s; }
+  .neonGame { animation: neonGame 4.2s ease-in-out infinite; animation-delay: -1.3s; }
+  .neonOpen { animation: neonOpen 7.8s ease-in-out infinite; animation-delay: -4.0s; }
+  
+  /* ── Neon road spill ─────────────────────────────────────────────────── */
+  /* Coloured light pooling on the ground beneath each sign — same timing as its sign */
+  .spillHF   { animation: neonHF   6.0s ease-in-out infinite; }
+  .spill24H  { animation: neon24H  8.5s ease-in-out infinite; animation-delay: -2.1s; }
+  .spillGame { animation: neonGame 4.2s ease-in-out infinite; animation-delay: -1.3s; }
+  .spillOpen { animation: neonOpen 7.8s ease-in-out infinite; animation-delay: -4.0s; }
+  
+  /* ═══════════════════════════════════════════════════════════════════════
+     TURTLE FACE REVEAL
+     Applied to the full-colour face image (clipped to head region).
+     opacity 0 = face hidden (silhouette shows through from layer below)
+     opacity 1 = face visible (neon light illuminates the face)
+  
+     Mirrors neonHF exactly:
+       sign ON  (neonHF opacity 1)  → face visible (turtleFace opacity 1)
+       sign OFF (neonHF opacity 0)  → face hidden  (turtleFace opacity 0)
+     ═══════════════════════════════════════════════════════════════════════ */
+  @keyframes turtleFaceReveal {
+    /* Default: face hidden (silhouette only) */
+    0%        { opacity: 0;    }
+    /* neonHF fires its triple-flicker burst at 0–10% */
+    3%        { opacity: 0;    }  /* sign about to fire */
+    4%        { opacity: 0.95; }  /* sign ON  → face lit    */
+    5%        { opacity: 0;    }  /* sign cuts              */
+    6%        { opacity: 0.9;  }  /* sign ON again          */
+    7%        { opacity: 0;    }  /* sign cuts              */
+    8%        { opacity: 0.6;  }  /* weak recovery          */
+    10%       { opacity: 0;    }  /* sign settles off       */
+    /* long dark rest — silhouette only */
+    70%       { opacity: 0;    }
+    /* neonHF double-blackout at 71–75% (inverse: that's when sign goes dark,
+       so nothing to reveal here — face stays hidden) */
+    75%       { opacity: 0;    }
+    100%      { opacity: 0;    }
+  }
+  
+  .turtleFace { animation: turtleFaceReveal 6.0s ease-in-out infinite; }
+  
+  /* ── Cloud drift ─────────────────────────────────────────────────────── */
+  @keyframes cloudDrift {
+    0%   { transform: translateX(0); }
+    50%  { transform: translateX(18px); }
+    100% { transform: translateX(0); }
+  }
+  @keyframes cloudDriftSlow {
+    0%   { transform: translateX(0); }
+    50%  { transform: translateX(-12px); }
+    100% { transform: translateX(0); }
+  }
+  .cloudDrift     { animation: cloudDrift     20s ease-in-out infinite; }
+  .cloudDriftSlow { animation: cloudDriftSlow 28s ease-in-out infinite; }
+  
+  /* ── River shimmer ───────────────────────────────────────────────────── */
+  @keyframes riverShimmer {
+    0%   { stroke-dashoffset: 0; opacity: 0.6; }
+    50%  { stroke-dashoffset: -40; opacity: 1; }
+    100% { stroke-dashoffset: -80; opacity: 0.6; }
+  }
+  .riverShimmer {
+    stroke-dasharray: 60 40;
+    animation: riverShimmer 3s linear infinite;
+  }
