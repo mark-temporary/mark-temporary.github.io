@@ -1,0 +1,49 @@
+items:
+  - title: "Bunbrush in Operation Friendship Repair"
+    description: >
+      A supercharged SCUMM v6 derivative,
+      the SCUNK engine is the backbone of all 2D multiplatform developments here at Happy-Ferret Entertainment 
+    img: "/img/Bunbrush.png"
+    URL: "https://happy-ferret.itch.io/bunbrush1"
+    release_date: "2026-02-28"
+    tags: 
+      - Web
+      - Windows
+      - macOS
+      - GNU/Linux
+      - N64
+      - Dreamcast
+
+  - title: "OceanThrill Murder Mystery"
+    description: >
+      A supercharged SCUMM v6 derivative,
+      the SCUNK engine is the backbone of all 2D multiplatform developments here at Happy-Ferret Entertainment 
+    img: "/img/OceanThrill.png"
+    URL: "https://happy-ferret.com/games/ferret-quest"
+    release_date: "2026-12-24"
+    tags: 
+      - Amiga
+      - AtariST
+      - C64 / C128
+      - ZX Spectrum Next
+      - Amstrad CPC
+      - Windows
+      - macOS
+      - GNU/Linux
+      - MS DOS
+
+  - title: "Tomáš: Prince of Rejection"
+    description: >
+      Picking up where SCUNK leaves off,
+      StoryBun modernizes the developer tooling while featuring a new rendering pipeline entirely focused
+      on current generation platforms. 
+    img: "/img/Tomasz.png"
+    URL: "https://happy-ferret.com/games/ferret-quest"
+    release_date: "TBA"
+    tags:
+      - Windows
+      - macOS
+      - GNU/Linux
+      - Xbox Series
+      - Android
+      - iOS

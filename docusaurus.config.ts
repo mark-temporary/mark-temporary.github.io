@@ -64,7 +64,7 @@ const config: Config = {
 
   themeConfig: {
     // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'img/happy-ferret-social-card.jpg',
     colorMode: {
       respectPrefersColorScheme: true,
     },
@@ -75,13 +75,16 @@ const config: Config = {
         src: 'img/logo.svg',
       },
       items: [
-        {
-          type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
-          position: 'left',
-          label: 'Games',
-        },
+        // {
+        //   type: 'docSidebar',
+        //   sidebarId: 'tutorialSidebar',
+        //   position: 'left',
+        //   label: 'Games',
+        // },
+        {to: '/games', label: 'Games', position: 'left'},
         {to: '/blog', label: 'Blog', position: 'left'},
+        {to: '/technologies', label: 'Technologies', position: 'left'},
+        {to: '/memorial', label: 'Halls of the Fallen', position: 'right'},
       ],
     },
     footer: {
@@ -92,7 +95,11 @@ const config: Config = {
           items: [
             {
               label: 'Games',
-              to: '/docs/intro',
+              to: '/games',
+            },
+            {
+              label: 'Technologies',
+              to: '/technologies',
             },
           ],
         },
@@ -110,6 +117,10 @@ const config: Config = {
             {
               label: 'Patreon',
               href: 'https://www.patreon.com/happyferret'
+            },
+            {
+              label: 'Bluesky',
+              href: 'https://bsky.app/profile/happy-ferret.bsky.social'
             }
             // {
             //   label: 'X',
