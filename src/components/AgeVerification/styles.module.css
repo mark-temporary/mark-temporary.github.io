@@ -1,0 +1,184 @@
+/* ============================================================
+   AgeVerification styles
+   Retro pixel-art aesthetic, consistent with the site theme.
+   ============================================================ */
+
+/* ── Root wrapper (positions the overlay relative to nearest ancestor) ── */
+.root {
+    position: relative;
+  }
+  
+  /* ── Hidden content behind the gate ──────────────────────────────────── */
+  .hiddenContent {
+    /* Blur + pointer-events off so the content is visible but unusable */
+    filter: blur(12px) brightness(0.4);
+    pointer-events: none;
+    user-select: none;
+  }
+  
+  /* ── Gate base ────────────────────────────────────────────────────────── */
+  .gate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  
+  /* Full-viewport overlay */
+  .gateOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 12, 8, 0.82);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  
+  /* Inline — fills its container (used inside carousel panels) */
+  .gateInline {
+    position: absolute;
+    inset: 0;
+    padding-top: 20%;
+    background: rgba(4, 12, 8, 0.88);
+  }
+  
+  /* ── Panel (the card) ─────────────────────────────────────────────────── */
+  .panel {
+    background: var(--ifm-background-surface-color, #0d1f16);
+    border: 2px solid var(--ifm-color-primary);
+    border-radius: 6px;
+    padding: 2rem 2.5rem 2.25rem;
+    width: min(420px, 90vw);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    box-shadow:
+      0 0 0 1px var(--ifm-color-primary-darker),
+      0 0 32px 4px color-mix(in srgb, var(--ifm-color-primary) 30%, transparent);
+    text-align: center;
+  }
+  
+  /* ── Icon ─────────────────────────────────────────────────────────────── */
+  .icon {
+    font-size: 2.2rem;
+    line-height: 1;
+    margin-bottom: -0.25rem;
+  }
+  
+  /* ── Title ────────────────────────────────────────────────────────────── */
+  .title {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--ifm-color-primary-lightest);
+    letter-spacing: 0.04em;
+  }
+  
+  /* ── Subtitle ─────────────────────────────────────────────────────────── */
+  .subtitle {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ifm-color-emphasis-700);
+    line-height: 1.5;
+  }
+  
+  /* ── Form ─────────────────────────────────────────────────────────────── */
+  .form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .fields {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+  
+  .fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    align-items: center;
+  }
+  
+  .fieldLabel {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ifm-color-emphasis-600);
+  }
+  
+  .fieldInput {
+    width: 64px;
+    padding: 0.45rem 0.5rem;
+    text-align: center;
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
+    background: var(--ifm-background-color, #071510);
+    border: 1px solid var(--ifm-color-emphasis-400);
+    border-radius: 3px;
+    color: var(--ifm-font-color-base);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  
+    /* Hide browser number spinners */
+    -moz-appearance: textfield;
+  }
+  .fieldInput::-webkit-outer-spin-button,
+  .fieldInput::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  .fieldInput:focus {
+    outline: none;
+    border-color: var(--ifm-color-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ifm-color-primary) 30%, transparent);
+  }
+  
+  .fieldInputWide {
+    width: 90px;
+  }
+  
+  /* ── Error message ────────────────────────────────────────────────────── */
+  .errorMsg {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--ifm-color-danger, #e03030);
+  }
+  
+  /* ── Submit button ────────────────────────────────────────────────────── */
+  .submitBtn {
+    padding: 0.5rem 2rem;
+    border: 2px solid var(--ifm-color-primary);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--ifm-color-primary);
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 150ms ease, box-shadow 150ms ease;
+  }
+  
+  .submitBtn:hover {
+    background: color-mix(in srgb, var(--ifm-color-primary) 15%, transparent);
+    box-shadow: 0 0 12px 2px color-mix(in srgb, var(--ifm-color-primary) 40%, transparent);
+  }
+  
+  .submitBtn:active {
+    transform: scale(0.97);
+  }
+  
+  /* ── Failure state ────────────────────────────────────────────────────── */
+  .failState {
+    padding: 0.5rem 0;
+  }
+  
+  .failMsg {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ifm-color-emphasis-700);
+    line-height: 1.6;
+  }

@@ -17,6 +17,8 @@ export interface ShowcaseItem {
   release_date?: string;
   birth?: string;
   death?: string;
+  /** Visual style for the image. "circle" clips the image into a circle. */
+  type?: 'circle' | 'default';
 }
 
 export interface ShowcaseProps {
@@ -200,6 +202,7 @@ function validateItem(raw: YamlMap, index?: number): ShowcaseItem {
     release_date: raw.release_date !== undefined ? String(raw.release_date) : undefined,
     birth: raw.birth !== undefined ? String(raw.birth) : undefined,
     death: raw.death !== undefined ? String(raw.death) : undefined,
+    type:         raw.type === 'circle' ? 'circle' : 'default',
   };
 }
 
@@ -257,13 +260,19 @@ function TagList({ tags }: { tags: string[] }): ReactNode {
 }
 
 function ShowcaseCard({ item }: { item: ShowcaseItem }): ReactNode {
-  const { title, description, img, URL: href, tags, release_date, birth, death } = item;
+  const { title, description, img, URL: href, tags, release_date, birth, death, type } = item;
+  const isCircle = type === 'circle';
   return (
-    <article className={styles.card}>
+    <article className={`${styles.card} ${isCircle ? styles.cardCircle : ''}`}>
 
       {/* Image link — decorative duplicate of the title link, hidden from AT */}
-      <Link href={href} className={styles.imgWrapper} aria-hidden tabIndex={-1}>
-        <img src={img} alt="" className={styles.img} />
+      <Link
+        href={href}
+        className={`${styles.imgWrapper} ${isCircle ? styles.imgWrapperCircle : ''}`}
+        aria-hidden
+        tabIndex={-1}
+      >
+        <img src={img} alt="" className={`${styles.img} ${isCircle ? styles.imgCircle : ''}`} />
       </Link>
 
       <div className={styles.body}>

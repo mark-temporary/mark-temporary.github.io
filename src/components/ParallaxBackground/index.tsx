@@ -281,7 +281,7 @@ function MidCity() {
       <rect x="200" y="240" width="120" height="360" fill="#091912" />
       <rect x="200" y="240" width="120" height="6"   fill="#0e2a1a" />
       <Windows x={210} y={256} cols={3} rows={8} gap={10} ww={12} wh={8} litColor="#c8f0ff" litChance={0.35} />
-      <NeonSign x={212} y={430} text="24H" color="#ff4da6" size={16} filterId="pb-neon-pink" className={styles.neon24H} />
+      <NeonSign x={212} y={430} text="❤️Retro❤️" color="#ff4da6" size={16} filterId="pb-neon-pink" className={styles.neon24H} />
       {/* 24H road spill — pink */}
       <rect x="202" y="536" width="116" height="8" rx="4"
         fill="rgba(255,77,166,0.16)" className={styles.spill24H} />
@@ -298,7 +298,7 @@ function MidCity() {
       {/* ── Building D ── */}
       <rect x="580" y="310" width="160" height="290" fill="#091610" />
       <Windows x={590} y={322} cols={4} rows={6} gap={9} ww={13} wh={9} litColor="#b8ffee" litChance={0.4} />
-      <NeonSign x={592} y={455} text="GAME" color="#00ffcc" size={14} filterId="pb-neon-green" className={styles.neonGame} />
+      <NeonSign x={592} y={455} text="Fun 4 Everyone" color="#00ffcc" size={14} filterId="pb-neon-green" className={styles.neonGame} />
       {/* GAME road spill — teal */}
       <rect x="582" y="536" width="148" height="8" rx="4"
         fill="rgba(0,255,204,0.15)" className={styles.spillGame} />

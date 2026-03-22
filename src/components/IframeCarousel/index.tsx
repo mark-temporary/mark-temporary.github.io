@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styles from './styles.module.css';
+import AgeVerification from '@site/src/components/AgeVerification';
 
 export interface ResponsiveSize {
   /** Viewport width (px) at or above which this size applies. */
@@ -13,9 +14,17 @@ export interface IframeCarouselProps {
   /** Array of iframe src URLs to cycle through. */
   srcs: string[];
   /**
+   * Optional per-slide age verification.
+   * Array index matches srcs index. Omit an entry (or set to undefined)
+   * to leave that slide unprotected.
+   *
+   * Each entry is the minimumAge integer, e.g.:
+   *   ageVerification={[undefined, 18, undefined]}
+   *   → only slide 2 requires age verification.
+   */
+  ageVerification?: (number | undefined)[];
+  /**
    * Responsive size breakpoints, sorted largest-first.
-   * The carousel picks the first entry whose minWidth ≤ window.innerWidth.
-   * Defaults to the original 960×720 / 640×480 / 320×240 breakpoints.
    */
   responsiveSizes?: ResponsiveSize[];
   /** Transition duration in ms. Default: 700 */
@@ -39,8 +48,9 @@ function pickSize(sizes: ResponsiveSize[]): ResponsiveSize {
 
 export default function IframeCarousel({
   srcs,
-  responsiveSizes = DEFAULT_SIZES,
-  transitionMs    = 700,
+  ageVerification  = [],
+  responsiveSizes  = DEFAULT_SIZES,
+  transitionMs     = 700,
 }: IframeCarouselProps): ReactNode {
   const n = srcs.length;
 
@@ -141,7 +151,17 @@ export default function IframeCarousel({
               width,
               height,
             };
-            const isActive = i === current;
+            const isActive  = i === current;
+            const minAge    = ageVerification[i];
+            const iframe = (
+              <iframe
+                ref={el => { iframeRefs.current[i] = el; }}
+                src={src}
+                title={`Slide ${i + 1}`}
+                className={styles.iframe}
+                style={{ pointerEvents: isActive ? 'auto' : 'none' }}
+              />
+            );
             return (
               <div
                 key={src}
@@ -149,13 +169,15 @@ export default function IframeCarousel({
                 style={panelStyle}
                 aria-hidden={!isActive}
               >
-                <iframe
-                  ref={el => { iframeRefs.current[i] = el; }}
-                  src={src}
-                  title={`Slide ${i + 1}`}
-                  className={styles.iframe}
-                  style={{ pointerEvents: isActive ? 'auto' : 'none' }}
-                />
+                {minAge !== undefined ? (
+                  <AgeVerification
+                    minimumAge={minAge}
+                    variant="inline"
+                    storageKey={`hf-age-verified-${minAge}-slide-${i}`}
+                  >
+                    {iframe}
+                  </AgeVerification>
+                ) : iframe}
                 <div className={styles.scanlines} aria-hidden />
               </div>
             );

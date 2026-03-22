@@ -60,6 +60,7 @@ function HomepageHeader(): ReactNode {
               { minWidth: 700,  width: 640, height: 480 },
               { minWidth: 0,    width: 320, height: 240 },
             ]}
+            ageVerification={[undefined, 18, undefined]}
           />
         </div>
       </div>
