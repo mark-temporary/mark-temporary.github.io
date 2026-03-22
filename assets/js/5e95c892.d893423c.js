@@ -1,1 +1,0 @@
-"use strict";(globalThis.webpackChunkhappy_ferret_company=globalThis.webpackChunkhappy_ferret_company||[]).push([[647],{7121(e,r,a){a.r(r),a.d(r,{default:()=>u});a(6540);var s=a(4164),p=a(7559),c=a(5500),h=a(2831),n=a(1656),t=a(4848);function u(e){return(0,t.jsx)(c.e3,{className:(0,s.A)(p.G.wrapper.docsPages),children:(0,t.jsx)(n.A,{children:(0,h.v)(e.route.routes)})})}}}]);
