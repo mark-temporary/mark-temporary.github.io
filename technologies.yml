@@ -1,0 +1,42 @@
+items:
+  - title: "SCUNK"
+    description: >
+      A supercharged SCUMM v6 derivative,
+      the SCUNK engine is the backbone of all 2D multiplatform developments here at Happy-Ferret Entertainment. 
+    img: "/img/SCUNK.svg"
+    URL: "https://happy-ferret.com/games/ferret-quest"
+    tags: 
+      - Amiga
+      - AtariST
+      - N64
+      - Sega Dreamcast
+      - MS DOS
+      - Web
+      - Windows
+      - macOS
+      - GNU/Linux
+      - Xbox Series
+      - Android
+      - iOS
+      - PS2
+      - PS3
+      - PS Vita
+      - PSP
+      - Sega Saturn (Planned)
+      - 3DO (Planned)
+      - PS1 (Planned)]
+
+  - title: "StoryBun"
+    description: >
+      Picking up where SCUNK leaves off,
+      StoryBun modernizes the developer tooling while featuring a new rendering pipeline entirely focused
+      on current generation platforms. 
+    img: "/img/StoryBun.svg"
+    URL: "https://happy-ferret.com/games/ferret-quest"
+    tags:
+      - Windows
+      - macOS
+      - GNU/Linux
+      - Xbox Series
+      - Android
+      - iOS
