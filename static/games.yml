@@ -1,8 +1,10 @@
 items:
   - title: "Bunbrush in Operation Friendship Repair"
     description: >
-      A supercharged SCUMM v6 derivative,
-      the SCUNK engine is the backbone of all 2D multiplatform developments here at Happy-Ferret Entertainment 
+      The original showpiece for our SCUNK engine.
+      A cozy point and click adventure game for young and old alike.
+      Join our heroine Bunbrush as she repairs not solely material things
+      but, eventually, the most important thing in life. Friendship
     img: "/img/Bunbrush.png"
     URL: "https://happy-ferret.itch.io/bunbrush1"
     release_date: "2026-02-28"
@@ -16,10 +18,13 @@ items:
 
   - title: "OceanThrill Murder Mystery"
     description: >
-      A supercharged SCUMM v6 derivative,
-      the SCUNK engine is the backbone of all 2D multiplatform developments here at Happy-Ferret Entertainment 
+      A multiplatform interactive fiction in the tradition of Infocom, Magnetic Scrolls and Level9.
+      A missing submersible, a group of rich adventurers who vanished on the way to the wreck of the RMS Lusitania and, 
+      on top of it all, the Interim CEO of OceanThrill (owner and operator of the missing Kepler 1 sub) 
+      murdered at his own private beachfront.
+      
+      This is the plot of Happy Ferret Entertainment's first in an upcoming series of mystery adventure games, presented in glorious 8 and 16 bit.
     img: "/img/OceanThrill.png"
-    URL: "https://happy-ferret.com/games/ferret-quest"
     release_date: "2026-12-24"
     tags: 
       - Amiga
@@ -34,11 +39,13 @@ items:
 
   - title: "Tomáš: Prince of Rejection"
     description: >
-      Picking up where SCUNK leaves off,
-      StoryBun modernizes the developer tooling while featuring a new rendering pipeline entirely focused
-      on current generation platforms. 
+      A spiritual successor to Al Lowe's beloved Leisure Suit Larry series.
+      Tomáš is your typical loser. Always on the hunt for the love of his life, yet his toxic personality dooms him
+      to a life in which the only attention a woman will ever grant him is a Karate kick to his crown jewels.
+
+      Follow Tomáš on his first adventure through the ancient Middle East, as he ventures to proclaim himself the Messiah,
+      romance Mary Magdalene and garner the ire of Roman and Jew alike.  
     img: "/img/Tomasz.png"
-    URL: "https://happy-ferret.com/games/ferret-quest"
     release_date: "TBA"
     tags:
       - Windows
