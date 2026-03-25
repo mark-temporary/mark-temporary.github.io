@@ -84,6 +84,7 @@ const config: Config = {
         {to: '/games', label: 'Games', position: 'left'},
         {to: '/blog', label: 'Blog', position: 'left'},
         {to: '/technologies', label: 'Technologies', position: 'left'},
+        {to: '/contact', label: 'Contact', position: 'right'},
         {to: '/memorial', label: 'Halls of the Fallen', position: 'right'},
       ],
     },

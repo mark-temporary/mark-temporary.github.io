@@ -1,0 +1,172 @@
+/* ============================================================
+   ContactForm styles
+   Retro neon aesthetic — consistent with Happy Ferret site theme.
+   ============================================================ */
+
+/* ── Outer wrapper ────────────────────────────────────────────────────── */
+.wrapper {
+    background: var(--ifm-background-surface-color, #0d1f16);
+    border: 2px solid var(--ifm-color-primary);
+    border-radius: 6px;
+    padding: 2.5rem 3rem 2.75rem;
+    width: min(560px, 92vw);
+    margin: 3rem auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow:
+      0 0 0 1px var(--ifm-color-primary-darker),
+      0 0 40px 6px color-mix(in srgb, var(--ifm-color-primary) 25%, transparent);
+  }
+  
+  /* ── Heading ──────────────────────────────────────────────────────────── */
+  .heading {
+    margin: 0;
+    font-size: 1.8rem;
+    letter-spacing: 0.04em;
+    /* hf-neon-title applied via className — no additional color override needed */
+  }
+  
+  /* ── Form ─────────────────────────────────────────────────────────────── */
+  .form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  
+  /* ── Field groups ─────────────────────────────────────────────────────── */
+  .fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  
+  .label {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ifm-color-emphasis-600);
+  }
+  
+  /* ── Inputs & textarea ────────────────────────────────────────────────── */
+  .input {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.95rem;
+    background: var(--ifm-background-color, #071510);
+    border: 1px solid var(--ifm-color-emphasis-400);
+    border-radius: 3px;
+    color: var(--ifm-font-color-base);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    box-sizing: border-box;
+  }
+  
+  .input::placeholder {
+    color: var(--ifm-color-emphasis-500);
+  }
+  
+  .input:focus {
+    outline: none;
+    border-color: var(--ifm-color-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ifm-color-primary) 28%, transparent);
+  }
+  
+  .input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .textarea {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+    line-height: 1.5;
+  }
+  
+  /* ── Buttons ──────────────────────────────────────────────────────────── */
+  .btn {
+    padding: 0.55rem 2.25rem;
+    border: 2px solid var(--ifm-color-primary);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--ifm-color-primary);
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 150ms ease, box-shadow 150ms ease, transform 80ms ease;
+    align-self: center;
+  }
+  
+  .btn:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--ifm-color-primary) 15%, transparent);
+    box-shadow: 0 0 14px 3px color-mix(in srgb, var(--ifm-color-primary) 40%, transparent);
+  }
+  
+  .btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  
+  .btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  
+  .submitBtn.sending {
+    opacity: 0.65;
+  }
+  
+  /* ── Feedback states (success / error) ───────────────────────────────── */
+  .icon {
+    font-size: 2.6rem;
+    line-height: 1;
+  }
+  
+  /* Success */
+  .successWrapper {
+    text-align: center;
+  }
+  
+  .successTitle {
+    margin: 0;
+    font-size: 1.4rem;
+    color: var(--ifm-color-primary-lightest);
+    letter-spacing: 0.04em;
+  }
+  
+  .successText {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--ifm-color-emphasis-700);
+    line-height: 1.6;
+  }
+  
+  /* Error */
+  .errorWrapper {
+    text-align: center;
+  }
+  
+  .errorTitle {
+    margin: 0;
+    font-size: 1.4rem;
+    color: var(--ifm-color-danger, #e03030);
+    letter-spacing: 0.04em;
+  }
+  
+  .errorDetail {
+    margin: 0;
+    font-size: 0.78rem;
+    font-family: var(--ifm-font-family-monospace);
+    color: var(--ifm-color-danger, #e03030);
+    opacity: 0.75;
+    word-break: break-all;
+  }
+  
+  .errorHint {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ifm-color-emphasis-700);
+    line-height: 1.5;
+  }
