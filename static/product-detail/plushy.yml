@@ -1,0 +1,39 @@
+# --- Shop item (id/price/currency must match the Shop items array) ---
+id:          ferret-plushie
+name:        Ferret Plushie
+price:       2990
+currency:    chf
+maxQuantity: 10
+
+# --- Detail page ---
+images:
+  - /img/shop/plushy.png
+  - /img/shop/plushy2.png
+
+
+body: |
+  ## About this product
+
+  Hand-sewn from organic cotton and filled with hypoallergenic stuffing,
+  the Happy Ferret Plushie is the perfect companion for retro gaming sessions.
+
+  Each plushie is individually quality-checked and ships in a branded box
+  with a collector card.
+
+  ### Care instructions
+
+  - Surface wash only
+  - Do not tumble dry
+  - Suitable for ages 3+
+
+facts:
+  - label: Material
+    value: Organic cotton
+  - label: Dimensions
+    value: 25 × 18 × 12 cm
+  - label: Age rating
+    value: "3+"
+  - label: Origin
+    value: Made in Switzerland
+  - label: Ships within
+    value: 2–3 business days

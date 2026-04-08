@@ -1,134 +1,53 @@
 /**
- * Shop
+ * Shop — Stripe Checkout (hosted) product grid with persistent cart.
  *
- * A Stripe Checkout (hosted) shop component.
- *
- * Usage in any .mdx or .tsx page:
- *
+ * Usage:
  *   <Shop
+ *     currency="chf"
+ *     checkoutEndpoint="/api/create-checkout-session"
  *     items={[
  *       {
  *         id:          "ferret-plushie",
  *         name:        "Ferret Plushie",
  *         description: "A soft ferret friend for your desk.",
- *         price:       1999,        // in the smallest currency unit (cents)
+ *         price:       2990,
  *         currency:    "chf",
  *         image:       "/img/ferret-plushie.jpg",
  *         maxQuantity: 10,
+ *         detailUrl:   "/shop/ferret-plushie",   // optional detail page link
  *       },
  *     ]}
- *     checkoutEndpoint="/api/create-checkout-session"
  *   />
- *
- * Props:
- *   items              Array of ShopItem objects to display.
- *   checkoutEndpoint   URL of your backend endpoint that creates a Stripe
- *                      Checkout Session and returns { url: string }.
- *                      Defaults to "/api/create-checkout-session".
- *   currency           Default currency for all items (overridden per-item).
- *                      Defaults to "usd".
  */
 
 import type { ReactNode } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
+import Link from '@docusaurus/Link';
 import styles from './styles.module.css';
+import type { ShopItem } from './types';
+import {
+  CartEntry, PersistedEntry,
+  CART_STORAGE_KEY,
+  loadCart, loadRawCart, saveCart, clearCart,
+  cartAdd, cartUpdate, cartRemove, cartTotalItems,
+  formatPrice,
+} from './cart';
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export interface ShopItem {
-  /** Unique identifier passed to the backend to look up price/product. */
-  id:           string;
-  name:         string;
-  description?: string;
-  /** Price in the smallest currency unit (e.g. cents for USD/CHF/EUR). */
-  price:        number;
-  currency?:    string;
-  image?:       string;
-  /** Maximum quantity the user can add to cart. Default: 99. */
-  maxQuantity?: number;
-}
+export type { ShopItem } from './types';
+export type { CartEntry } from './cart';
 
 export interface ShopProps {
-  items:               ShopItem[];
-  checkoutEndpoint?:   string;
-  currency?:           string;
-}
-
-interface CartEntry {
-  item:     ShopItem;
-  quantity: number;
-}
-
-// ---------------------------------------------------------------------------
-// Cart persistence — sessionStorage
-//
-// sessionStorage survives page navigations within the same tab (including
-// the Stripe redirect → back-button flow) but is cleared when the tab or
-// browser closes, giving it the same lifetime as a traditional session cookie
-// without polluting every HTTP request with cookie headers.
-//
-// The cart is stored as a plain JSON array of { id, quantity } tuples.
-// Full item data (name, price, image …) is always sourced from the `items`
-// prop so stale cached prices can never reach the checkout.
-// ---------------------------------------------------------------------------
-
-const CART_STORAGE_KEY = 'hf-shop-cart';
-
-interface PersistedEntry {
-  id:       string;
-  quantity: number;
-}
-
-function loadCart(items: ShopItem[]): CartEntry[] {
-  try {
-    const raw = sessionStorage.getItem(CART_STORAGE_KEY);
-    if (!raw) return [];
-    const persisted: PersistedEntry[] = JSON.parse(raw);
-    // Re-hydrate from current items prop so prices/names are always fresh
-    return persisted.flatMap(({ id, quantity }) => {
-      const item = items.find(i => i.id === id);
-      if (!item || quantity < 1) return [];
-      return [{ item, quantity: Math.min(quantity, item.maxQuantity ?? 99) }];
-    });
-  } catch {
-    return [];
-  }
-}
-
-function saveCart(cart: CartEntry[]): void {
-  try {
-    const persisted: PersistedEntry[] = cart.map(({ item, quantity }) => ({
-      id: item.id,
-      quantity,
-    }));
-    sessionStorage.setItem(CART_STORAGE_KEY, JSON.stringify(persisted));
-  } catch { /* private browsing or storage full — silently ignore */ }
-}
-
-function clearCart(): void {
-  try {
-    sessionStorage.removeItem(CART_STORAGE_KEY);
-  } catch {}
+  items:              ShopItem[];
+  checkoutEndpoint?:  string;
+  currency?:          string;
 }
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-function formatPrice(amount: number, currency: string): string {
-  return new Intl.NumberFormat('en-US', {
-    style:    'currency',
-    currency: currency.toUpperCase(),
-    minimumFractionDigits: 2,
-  }).format(amount / 100);
-}
-
 function cartTotal(cart: CartEntry[], defaultCurrency: string): string {
   if (cart.length === 0) return '';
-  // Use the first item's currency as the display currency (all items should
-  // share a currency in a single checkout session).
   const currency = cart[0].item.currency ?? defaultCurrency;
   const total = cart.reduce((sum, e) => sum + e.item.price * e.quantity, 0);
   return formatPrice(total, currency);
@@ -148,15 +67,34 @@ function ProductCard({
   onAdd:    (item: ShopItem) => void;
 }): ReactNode {
   const displayCurrency = item.currency ?? currency;
+  const isDigital = item.type === 'digital';
   return (
     <div className={styles.card}>
-      {item.image && (
-        <div className={styles.cardImgWrapper}>
-          <img src={item.image} alt={item.name} className={styles.cardImg} />
-        </div>
-      )}
+      <div className={styles.cardImgWrapper}>
+        {item.image && (
+          item.detailUrl
+            ? <Link href={item.detailUrl} tabIndex={-1} aria-hidden>
+                <img src={item.image} alt={item.name} className={styles.cardImg} />
+              </Link>
+            : <img src={item.image} alt={item.name} className={styles.cardImg} />
+        )}
+        {isDigital && (
+          <span className={styles.digitalBadge} aria-label="Digital download only" title="Digital download — no physical product">
+            <svg className={styles.digitalIcon} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              {/* Arrow pointing down into a tray — universally understood "download" symbol */}
+              <path d="M8 1v8M5 6l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 11v1a2 2 0 002 2h8a2 2 0 002-2v-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            Digital
+          </span>
+        )}
+      </div>
       <div className={styles.cardBody}>
-        <h3 className={styles.cardTitle}>{item.name}</h3>
+        <h3 className={styles.cardTitle}>
+          {item.detailUrl
+            ? <Link href={item.detailUrl}>{item.name}</Link>
+            : item.name}
+        </h3>
         {item.description && (
           <p className={styles.cardDesc}>{item.description}</p>
         )}
@@ -164,12 +102,11 @@ function ProductCard({
           <span className={styles.cardPrice}>
             {formatPrice(item.price, displayCurrency)}
           </span>
-          <button
-            className={styles.addBtn}
-            onClick={() => onAdd(item)}
-          >
-            Add to cart
-          </button>
+          <div className={styles.cardActions}>
+            <button className={styles.addBtn} onClick={() => onAdd(item)}>
+              Add to cart
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -220,29 +157,21 @@ function CartDrawer({
                     <img src={item.image} alt={item.name} className={styles.cartThumb} />
                   )}
                   <div className={styles.cartRowBody}>
-                    <span className={styles.cartRowName}>{item.name}</span>
+                    <span className={styles.cartRowName}>
+                      {item.detailUrl
+                        ? <Link href={item.detailUrl}>{item.name}</Link>
+                        : item.name}
+                    </span>
                     <span className={styles.cartRowPrice}>
                       {formatPrice(item.price * quantity, item.currency ?? currency)}
                     </span>
                   </div>
                   <div className={styles.cartQty}>
-                    <button
-                      className={styles.qtyBtn}
-                      onClick={() => onUpdateQty(item.id, -1)}
-                      aria-label="Decrease quantity"
-                    >−</button>
+                    <button className={styles.qtyBtn} onClick={() => onUpdateQty(item.id, -1)} aria-label="Decrease">−</button>
                     <span className={styles.qtyValue}>{quantity}</span>
-                    <button
-                      className={styles.qtyBtn}
-                      onClick={() => onUpdateQty(item.id, 1)}
-                      disabled={quantity >= (item.maxQuantity ?? 99)}
-                      aria-label="Increase quantity"
-                    >+</button>
-                    <button
-                      className={styles.removeBtn}
-                      onClick={() => onRemove(item.id)}
-                      aria-label="Remove item"
-                    >🗑</button>
+                    <button className={styles.qtyBtn} onClick={() => onUpdateQty(item.id, 1)}
+                      disabled={quantity >= (item.maxQuantity ?? 99)} aria-label="Increase">+</button>
+                    <button className={styles.removeBtn} onClick={() => onRemove(item.id)} aria-label="Remove">🗑</button>
                   </div>
                 </li>
               ))}
@@ -253,15 +182,9 @@ function CartDrawer({
               <span className={styles.totalValue}>{cartTotal(cart, currency)}</span>
             </div>
 
-            {error && (
-              <p className={styles.checkoutError} role="alert">{error}</p>
-            )}
+            {error && <p className={styles.checkoutError} role="alert">{error}</p>}
 
-            <button
-              className={styles.checkoutBtn}
-              onClick={onCheckout}
-              disabled={loading}
-            >
+            <button className={styles.checkoutBtn} onClick={onCheckout} disabled={loading}>
               {loading ? 'Redirecting…' : 'Checkout with Stripe'}
             </button>
 
@@ -284,39 +207,47 @@ export default function Shop({
   checkoutEndpoint = '/api/create-checkout-session',
   currency         = 'usd',
 }: ShopProps): ReactNode {
-  const [cart,        setCart       ] = useState<CartEntry[]>(() => loadCart(items));
-  const [drawerOpen,  setDrawerOpen ] = useState(false);
-  const [loading,     setLoading    ] = useState(false);
-  const [error,       setError      ] = useState<string | null>(null);
+  const [cart,       setCart      ] = useState<CartEntry[]>(() => loadCart(items));
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [loading,    setLoading   ] = useState(false);
+  const [error,      setError     ] = useState<string | null>(null);
 
-  // Persist cart to sessionStorage whenever it changes
+  // Persist on every cart change
   useEffect(() => {
-    saveCart(cart);
+    saveCart(cart.map(({ item, quantity }) => ({ id: item.id, quantity })));
   }, [cart]);
+
+  // Re-hydrate if another tab/page updated storage (e.g. ProductDetail added an item)
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === CART_STORAGE_KEY) setCart(loadCart(items));
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [items]);
 
   const totalItems = cart.reduce((n, e) => n + e.quantity, 0);
 
   const addToCart = useCallback((item: ShopItem) => {
     setCart(prev => {
-      const existing = prev.find(e => e.item.id === item.id);
-      if (existing) {
-        const max = item.maxQuantity ?? 99;
-        if (existing.quantity >= max) return prev;
-        return prev.map(e =>
-          e.item.id === item.id ? { ...e, quantity: e.quantity + 1 } : e
-        );
-      }
-      return [...prev, { item, quantity: 1 }];
+      const raw = prev.map(e => ({ id: e.item.id, quantity: e.quantity }));
+      const updated = cartAdd(raw, item);
+      return updated.flatMap(({ id, quantity }) => {
+        const it = items.find(i => i.id === id) ?? item;
+        return [{ item: it, quantity }];
+      });
     });
     setDrawerOpen(true);
-  }, []);
+  }, [items]);
 
   const updateQty = useCallback((id: string, delta: number) => {
-    setCart(prev =>
-      prev
-        .map(e => e.item.id === id ? { ...e, quantity: e.quantity + delta } : e)
-        .filter(e => e.quantity > 0)
-    );
+    setCart(prev => {
+      const raw = cartUpdate(prev.map(e => ({ id: e.item.id, quantity: e.quantity })), id, delta);
+      return raw.flatMap(({ id: rid, quantity }) => {
+        const it = prev.find(e => e.item.id === rid)?.item;
+        return it ? [{ item: it, quantity }] : [];
+      });
+    });
   }, []);
 
   const removeItem = useCallback((id: string) => {
@@ -327,30 +258,16 @@ export default function Shop({
     setLoading(true);
     setError(null);
     try {
-      const lineItems = cart.map(({ item, quantity }) => ({
-        itemId:   item.id,
-        quantity,
-      }));
-
       const res = await fetch(checkoutEndpoint, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ lineItems }),
+        body:    JSON.stringify({ lineItems: cart.map(({ item, quantity }) => ({ itemId: item.id, quantity })) }),
       });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || `Server error ${res.status}`);
-      }
-
+      if (!res.ok) throw new Error(await res.text() || `Server error ${res.status}`);
       const { url } = await res.json();
       if (!url) throw new Error('No checkout URL returned from server.');
-
-      // Clear the cart before handing off — Stripe's success_url should
-      // be a dedicated page so the user doesn't return to a stale cart.
       clearCart();
       setCart([]);
-
       window.location.href = url;
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
@@ -360,42 +277,25 @@ export default function Shop({
 
   return (
     <div className={styles.shop}>
-      {/* Floating cart button */}
       <div className={styles.cartBtnWrapper}>
-        <button
-          className={styles.cartBtn}
-          onClick={() => setDrawerOpen(true)}
-          aria-label={`Open cart, ${totalItems} item${totalItems !== 1 ? 's' : ''}`}
-        >
+        <button className={styles.cartBtn} onClick={() => setDrawerOpen(true)}
+          aria-label={`Open cart, ${totalItems} item${totalItems !== 1 ? 's' : ''}`}>
           🛒
-          {totalItems > 0 && (
-            <span className={styles.cartBadge}>{totalItems}</span>
-          )}
+          {totalItems > 0 && <span className={styles.cartBadge}>{totalItems}</span>}
         </button>
       </div>
 
-      {/* Product grid */}
       <div className={styles.grid}>
         {items.map(item => (
-          <ProductCard
-            key={item.id}
-            item={item}
-            currency={currency}
-            onAdd={addToCart}
-          />
+          <ProductCard key={item.id} item={item} currency={currency} onAdd={addToCart} />
         ))}
       </div>
 
-      {/* Cart drawer */}
       {drawerOpen && (
         <CartDrawer
-          cart={cart}
-          currency={currency}
-          onUpdateQty={updateQty}
-          onRemove={removeItem}
-          onCheckout={handleCheckout}
-          loading={loading}
-          error={error}
+          cart={cart} currency={currency}
+          onUpdateQty={updateQty} onRemove={removeItem}
+          onCheckout={handleCheckout} loading={loading} error={error}
           onClose={() => setDrawerOpen(false)}
         />
       )}

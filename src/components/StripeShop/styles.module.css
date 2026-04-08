@@ -74,9 +74,41 @@
   }
   
   .cardImgWrapper {
+    position: relative; /* anchor for the digital badge */
     overflow: hidden;
     line-height: 0;
     aspect-ratio: 4 / 3;
+  }
+  
+  /* ── Digital download badge ───────────────────────────────────────────── */
+  .digitalBadge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px 3px 5px;
+    border-radius: 3px;
+    background: rgba(10, 20, 14, 0.78);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(57, 255, 138, 0.45);
+    color: #39ff8a;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    pointer-events: none;
+    line-height: 1;
+    /* Sit above the image but below the card hover shadow */
+    z-index: 1;
+  }
+  
+  .digitalIcon {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
   }
   
   .cardImg {
@@ -118,6 +150,28 @@
     justify-content: space-between;
     gap: 0.5rem;
     margin-top: 0.25rem;
+  }
+  
+  .cardActions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  
+  .detailLink {
+    font-size: 0.82rem;
+    color: var(--ifm-color-primary);
+    text-decoration: none;
+    border: 1px solid var(--ifm-color-primary);
+    border-radius: 3px;
+    padding: 0.32rem 0.7rem;
+    white-space: nowrap;
+    transition: background 150ms ease;
+  }
+  
+  .detailLink:hover {
+    background: color-mix(in srgb, var(--ifm-color-primary) 10%, transparent);
+    text-decoration: none;
   }
   
   .cardPrice {
