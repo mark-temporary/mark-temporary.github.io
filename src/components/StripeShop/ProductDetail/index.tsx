@@ -47,98 +47,15 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 import ReactMarkdown from 'react-markdown';
 import type { ShopItem } from '@site/src/components/StripeShop/types';
 import {
-  PersistedEntry,
+  type CartEntry,
   CART_STORAGE_KEY,
-  loadRawCart, saveCart, clearCart,
+  loadCart, saveCart, clearCart,
   cartAdd, cartUpdate, cartRemove, cartTotalItems,
-  formatPrice,
+  formatPrice, parsePrice,
 } from '@site/src/components/StripeShop/cart';
+import { parseYaml, type YamlMap } from '@site/src/components/StripeShop/yaml';
 import styles from './styles.module.css';
-import { CartDrawerStandalone } from './cartdrawer';
-
-// ---------------------------------------------------------------------------
-// YAML parser (reused from Showcase — same minimal recursive-descent approach)
-// ---------------------------------------------------------------------------
-
-type YamlValue = string | YamlValue[] | Record<string, YamlValue>;
-type YamlMap   = Record<string, YamlValue>;
-
-function parseYaml(raw: string): YamlMap {
-  const lines  = raw.replace(/\r\n/g, '\n').split('\n');
-  let   cursor = 0;
-  const indentOf  = (l: string) => l.match(/^(\s*)/)?.[1].length ?? 0;
-  const isBlank   = (l: string) => /^\s*(#.*)?$/.test(l);
-  const stripCmt  = (s: string) => s.replace(/(\s|^)#.*$/, '').trim();
-  const unquote   = (s: string) => {
-    const t = s.trim();
-    return ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'")))
-      ? t.slice(1, -1) : t;
-  };
-  const inlineSeq = (s: string): string[] => {
-    const inner = s.slice(s.indexOf('[') + 1, s.lastIndexOf(']'));
-    return inner ? inner.split(',').map(x => unquote(stripCmt(x))).filter(Boolean) : [];
-  };
-  const blockScalar = (fold: boolean, ownerIndent: number): string => {
-    const buf: string[] = [];
-    while (cursor < lines.length) {
-      const ln = lines[cursor];
-      if (!isBlank(ln) && indentOf(ln) <= ownerIndent) break;
-      buf.push(ln.replace(/^\s{0,2}/, ''));
-      cursor++;
-    }
-    while (buf.length && buf[buf.length - 1].trim() === '') buf.pop();
-    return fold ? buf.join(' ').replace(/\s{2,}/g, ' ').trim() : buf.join('\n').trim();
-  };
-  function mapping(baseIndent: number): YamlMap {
-    const map: YamlMap = {};
-    while (cursor < lines.length) {
-      const line = lines[cursor];
-      if (isBlank(line)) { cursor++; continue; }
-      if (indentOf(line) <= baseIndent) break;
-      const km = line.match(/^(\s*)([A-Za-z_][A-Za-z0-9_]*):\s*(.*)/);
-      if (!km) { cursor++; continue; }
-      const [, ws, key, rest] = km; const ki = ws.length; cursor++;
-      if (rest.trim() === '|' || rest.trim() === '>') { map[key] = blockScalar(rest.trim() === '>', ki); continue; }
-      if (rest.trim().startsWith('['))                 { map[key] = inlineSeq(rest.trim()); continue; }
-      if (rest.trim() === '') {
-        let peek = cursor;
-        while (peek < lines.length && isBlank(lines[peek])) peek++;
-        if (peek < lines.length && indentOf(lines[peek]) > ki) {
-          map[key] = /^\s*-\s/.test(lines[peek]) ? sequence(ki) : mapping(ki);
-          continue;
-        }
-        map[key] = ''; continue;
-      }
-      map[key] = unquote(stripCmt(rest.trim()));
-    }
-    return map;
-  }
-  function sequence(baseIndent: number): YamlValue[] {
-    const items: YamlValue[] = [];
-    while (cursor < lines.length) {
-      const line = lines[cursor];
-      if (isBlank(line)) { cursor++; continue; }
-      if (indentOf(line) <= baseIndent) break;
-      const im = line.match(/^(\s*)-\s*(.*)/);
-      if (!im) break;
-      const [, ws, rest] = im; const ii = ws.length; cursor++;
-      const ikm = rest.trim().match(/^([A-Za-z_][A-Za-z0-9_]*):\s*(.*)/);
-      if (ikm) {
-        const nested: YamlMap = {};
-        const [, fk, fv] = ikm;
-        if (fv.trim() === '|' || fv.trim() === '>') nested[fk] = blockScalar(fv.trim() === '>', ii);
-        else if (fv.trim().startsWith('['))           nested[fk] = inlineSeq(fv.trim());
-        else if (fv.trim() !== '')                    nested[fk] = unquote(stripCmt(fv.trim()));
-        Object.assign(nested, mapping(ii));
-        items.push(nested); continue;
-      }
-      if (rest.trim().startsWith('[')) { items.push(inlineSeq(rest.trim())); continue; }
-      items.push(unquote(stripCmt(rest.trim())));
-    }
-    return items;
-  }
-  return mapping(-1);
-}
+import { CartDrawerStandalone } from './CartDrawer';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -159,9 +76,12 @@ function validateData(raw: YamlMap): ProductDetailData {
   return {
     id:               String(raw.id),
     name:             String(raw.name),
-    price:            Number(raw.price),
-    currency:         raw.currency ? String(raw.currency) : 'usd',
+    price:            parsePrice(raw.price),
+    currency:         raw.currency    ? String(raw.currency)    : 'usd',
     maxQuantity:      raw.maxQuantity ? Number(raw.maxQuantity) : undefined,
+    type:             raw.type === 'digital' ? 'digital' : 'physical',
+    image:            raw.image     ? String(raw.image)     : undefined,
+    detailUrl:        raw.detailUrl ? String(raw.detailUrl) : undefined,
     images:           (raw.images as string[]),
     body:             raw.body   ? String(raw.body)   : undefined,
     checkoutEndpoint: raw.checkoutEndpoint ? String(raw.checkoutEndpoint) : undefined,
@@ -220,7 +140,7 @@ function ImageCarousel({ images, name }: { images: string[]; name: string }): Re
 export default function ProductDetail({ config }: { config: string }): ReactNode {
   const [data,       setData      ] = useState<ProductDetailData | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [cart,       setCart      ] = useState<PersistedEntry[]>(() => loadRawCart());
+  const [cart,       setCart      ] = useState<CartEntry[]>(() => loadCart());
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [added,      setAdded     ] = useState(false);
   const [loading,    setLoading   ] = useState(false);
@@ -238,13 +158,18 @@ export default function ProductDetail({ config }: { config: string }): ReactNode
     return () => { cancelled = true; };
   }, [yamlPath]);
 
-  // Sync cart from storage events (Shop on another page updated the cart)
+  // Sync cart from same-tab (hf-cart-updated) and cross-tab (storage) updates
   useEffect(() => {
+    const onUpdate = () => setCart(loadCart());
     const onStorage = (e: StorageEvent) => {
-      if (e.key === CART_STORAGE_KEY) setCart(loadRawCart());
+      if (e.key === CART_STORAGE_KEY) onUpdate();
     };
+    window.addEventListener('hf-cart-updated', onUpdate);
     window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('hf-cart-updated', onUpdate);
+      window.removeEventListener('storage', onStorage);
+    };
   }, []);
 
   const totalItems = cartTotalItems(cart);
@@ -264,12 +189,12 @@ export default function ProductDetail({ config }: { config: string }): ReactNode
     if (!data) return;
     setLoading(true);
     setCheckoutErr(null);
-    const endpoint = data.checkoutEndpoint ?? '/api/create-checkout-session';
+    const endpoint = data.checkoutEndpoint ?? 'https://super-glade-5406.bauermeistermarkusdev.workers.dev/';
     try {
       const res = await fetch(endpoint, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ lineItems: cart.map(({ id, quantity }) => ({ itemId: id, quantity })) }),
+        headers: { 'Content-Type': 'text/plain' },
+        body:    JSON.stringify({ lineItems: cart.map(({ item, quantity }) => ({ itemId: item.id, quantity })) }),
       });
       if (!res.ok) throw new Error(await res.text() || `Server error ${res.status}`);
       const { url } = await res.json();
@@ -297,12 +222,12 @@ export default function ProductDetail({ config }: { config: string }): ReactNode
   }
 
   const currency = data.currency ?? 'usd';
-  const inCart   = cart.find(e => e.id === data.id)?.quantity ?? 0;
+  const inCart   = cart.find(e => e.item.id === data.id)?.quantity ?? 0;
 
   return (
     <div className={styles.page}>
 
-      {/* ── Floating cart button ───────────────────────────────────────── */}
+      {/* ── Floating cart button ─────────────────────────────────────────
       <div className={styles.cartBtnWrapper}>
         <button className={styles.cartBtn}
           onClick={() => setDrawerOpen(true)}
@@ -310,7 +235,7 @@ export default function ProductDetail({ config }: { config: string }): ReactNode
           🛒
           {totalItems > 0 && <span className={styles.cartBadge}>{totalItems}</span>}
         </button>
-      </div>
+      </div> */}
 
       {/* ── Image carousel ────────────────────────────────────────────── */}
       <ImageCarousel images={data.images} name={data.name} />
@@ -357,6 +282,7 @@ export default function ProductDetail({ config }: { config: string }): ReactNode
       {drawerOpen && (
         <CartDrawerStandalone
           cart={cart}
+          currency={data.currency ?? 'usd'}
           onUpdateQty={(id, delta) => setCart(prev => { const u = cartUpdate(prev, id, delta); saveCart(u); return u; })}
           onRemove={(id) => setCart(prev => { const u = cartRemove(prev, id); saveCart(u); return u; })}
           onCheckout={handleCheckout}

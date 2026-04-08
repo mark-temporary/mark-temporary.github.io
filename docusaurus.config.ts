@@ -4,6 +4,16 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
+// Opening hours for the neon OPEN/CLOSED sign in ParallaxBackground.
+// Days use the JS Date convention: 0 = Sunday, 1 = Monday … 6 = Saturday.
+// Hours are in CET/CEST (Europe/Berlin) using a 24-hour clock.
+export type OpeningHours = {
+  openDays:  number[];  // which weekdays count as open
+  openHour:  number;    // first hour of the day that is open (inclusive)
+  closeHour: number;    // first hour of the day that is closed (exclusive)
+  timezone:  string;    // IANA timezone string
+};
+
 const config: Config = {
   title: "Welcome to Happy Ferret Entertainment",
   tagline: "Game development like it's 1990",
@@ -25,7 +35,31 @@ const config: Config = {
   organizationName: 'mark-temporary', // Usually your GitHub org/user name.
   projectName: 'website', // Usually your repo name.
 
+
+  customFields: {
+    openingHours: {
+      openDays:  [1, 2, 3, 4, 5], // Monday – Friday
+      openHour:  7,                // 07:00 CET/CEST
+      closeHour: 18,               // 18:00 CET/CEST
+      timezone:  'Europe/Berlin',
+    } satisfies OpeningHours,
+  },
+
   onBrokenLinks: 'throw',
+
+  plugins: [
+    [
+      'docusaurus-plugin-cookie-consent',
+      {
+        title: 'Cookie Consent',
+        description: 'We use cookies to enhance your browsing experience and analyze our traffic.',
+        links: [
+          { label: 'Privacy Policy', href: '/privacy' },
+          { label: 'Cookie Policy', href: '/cookies' },
+        ],
+      },
+    ],
+  ],
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
@@ -84,6 +118,7 @@ const config: Config = {
         {to: '/games', label: 'Games', position: 'left'},
         {to: '/blog', label: 'Blog', position: 'left'},
         {to: '/technologies', label: 'Technologies', position: 'left'},
+        {to: '/shop', label: 'Shop', position: 'left'},
         {to: '/contact', label: 'Contact', position: 'right'},
         {to: '/memorial', label: 'Halls of the Fallen', position: 'right'},
       ],

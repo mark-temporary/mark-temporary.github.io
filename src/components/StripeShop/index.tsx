@@ -1,146 +1,109 @@
 /**
- * Shop — Stripe Checkout (hosted) product grid with persistent cart.
+ * StripeShop
  *
- * Usage:
- *   <Shop
+ * Stripe Checkout (hosted) product grid with persistent cart.
+ *
+ * Usage — YAML catalogue (recommended, single source of truth):
+ *   <StripeShop config="shop.yml" />
+ *
+ *   shop.yml:
+ *     checkoutEndpoint: /api/create-checkout-session
+ *     currency: chf
+ *     items:
+ *       - config: product-detail/plushy.yml   # reads price/name/etc from there
+ *       - config: product-detail/game.yml
+ *
+ * Usage — inline items (no YAML file needed):
+ *   <StripeShop
  *     currency="chf"
- *     checkoutEndpoint="/api/create-checkout-session"
- *     items={[
- *       {
- *         id:          "ferret-plushie",
- *         name:        "Ferret Plushie",
- *         description: "A soft ferret friend for your desk.",
- *         price:       2990,
- *         currency:    "chf",
- *         image:       "/img/ferret-plushie.jpg",
- *         maxQuantity: 10,
- *         detailUrl:   "/shop/ferret-plushie",   // optional detail page link
- *       },
- *     ]}
+ *     items={[{ id: "x", name: "X", price: 999, currency: "chf" }]}
  *   />
  */
 
 import type { ReactNode } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from '@docusaurus/Link';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import styles from './styles.module.css';
 import type { ShopItem } from './types';
 import {
-  CartEntry, PersistedEntry,
+  type CartEntry,
   CART_STORAGE_KEY,
-  loadCart, loadRawCart, saveCart, clearCart,
-  cartAdd, cartUpdate, cartRemove, cartTotalItems,
-  formatPrice,
+  loadCart, saveCart, clearCart,
+  cartAdd, cartUpdate, cartRemove,
+  cartTotalPrice, formatPrice, parsePrice,
 } from './cart';
+import { parseYaml, type YamlMap } from './yaml';
+import { CartItemName } from './CartDisplay';
 
 export type { ShopItem } from './types';
 export type { CartEntry } from './cart';
 
-export interface ShopProps {
-  items:              ShopItem[];
-  checkoutEndpoint?:  string;
-  currency?:          string;
+// ---------------------------------------------------------------------------
+// Props
+// ---------------------------------------------------------------------------
+
+export interface StripeShopProps {
+  config?:           string;      // path to catalogue YAML in /static
+  items?:            ShopItem[];  // inline alternative to config
+  checkoutEndpoint?: string;
+  currency?:         string;
 }
 
 // ---------------------------------------------------------------------------
-// Helpers
+// YAML helpers
 // ---------------------------------------------------------------------------
 
-function cartTotal(cart: CartEntry[], defaultCurrency: string): string {
-  if (cart.length === 0) return '';
-  const currency = cart[0].item.currency ?? defaultCurrency;
-  const total = cart.reduce((sum, e) => sum + e.item.price * e.quantity, 0);
-  return formatPrice(total, currency);
+function shopItemFromYaml(r: YamlMap): ShopItem {
+  if (!r.id || !r.name || !r.price) {
+    throw new Error(`Product YAML is missing id, name, or price.`);
+  }
+  return {
+    id:          String(r.id),
+    name:        String(r.name),
+    price:       parsePrice(r.price),
+    currency:    r.currency    ? String(r.currency)    : undefined,
+    maxQuantity: r.maxQuantity ? Number(r.maxQuantity) : undefined,
+    image:       r.image       ? String(r.image)       : undefined,
+    detailUrl:   r.detailUrl   ? String(r.detailUrl)   : undefined,
+    type:        r.type === 'digital' ? 'digital' : 'physical',
+    description: r.description ? String(r.description) : undefined,
+  };
+}
+
+async function loadCatalogueItems(doc: YamlMap): Promise<ShopItem[]> {
+  const raw = doc.items as YamlMap[];
+  if (!Array.isArray(raw)) throw new Error('Shop YAML must have a top-level `items` array.');
+  return Promise.all(raw.map(async entry => {
+    if (entry.config) {
+      const url = '/' + String(entry.config).replace(/^\//, '');
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Could not load "${entry.config}": HTTP ${res.status}`);
+      return shopItemFromYaml(parseYaml(await res.text()));
+    }
+    return shopItemFromYaml(entry);
+  }));
 }
 
 // ---------------------------------------------------------------------------
-// Sub-components
+// CartDrawer (used only by StripeShop, not exported)
 // ---------------------------------------------------------------------------
 
-function ProductCard({
-  item,
-  currency,
-  onAdd,
-}: {
-  item:     ShopItem;
-  currency: string;
-  onAdd:    (item: ShopItem) => void;
-}): ReactNode {
-  const displayCurrency = item.currency ?? currency;
-  const isDigital = item.type === 'digital';
-  return (
-    <div className={styles.card}>
-      <div className={styles.cardImgWrapper}>
-        {item.image && (
-          item.detailUrl
-            ? <Link href={item.detailUrl} tabIndex={-1} aria-hidden>
-                <img src={item.image} alt={item.name} className={styles.cardImg} />
-              </Link>
-            : <img src={item.image} alt={item.name} className={styles.cardImg} />
-        )}
-        {isDigital && (
-          <span className={styles.digitalBadge} aria-label="Digital download only" title="Digital download — no physical product">
-            <svg className={styles.digitalIcon} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              {/* Arrow pointing down into a tray — universally understood "download" symbol */}
-              <path d="M8 1v8M5 6l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 11v1a2 2 0 002 2h8a2 2 0 002-2v-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-            Digital
-          </span>
-        )}
-      </div>
-      <div className={styles.cardBody}>
-        <h3 className={styles.cardTitle}>
-          {item.detailUrl
-            ? <Link href={item.detailUrl}>{item.name}</Link>
-            : item.name}
-        </h3>
-        {item.description && (
-          <p className={styles.cardDesc}>{item.description}</p>
-        )}
-        <div className={styles.cardFooter}>
-          <span className={styles.cardPrice}>
-            {formatPrice(item.price, displayCurrency)}
-          </span>
-          <div className={styles.cardActions}>
-            <button className={styles.addBtn} onClick={() => onAdd(item)}>
-              Add to cart
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function CartDrawer({
-  cart,
-  currency,
-  onUpdateQty,
-  onRemove,
-  onCheckout,
-  loading,
-  error,
-  onClose,
-}: {
-  cart:         CartEntry[];
-  currency:     string;
-  onUpdateQty:  (id: string, delta: number) => void;
-  onRemove:     (id: string) => void;
-  onCheckout:   () => void;
-  loading:      boolean;
-  error:        string | null;
-  onClose:      () => void;
+function CartDrawer({ cart, currency, onUpdateQty, onRemove, onCheckout, loading, error, onClose }: {
+  cart:        CartEntry[];
+  currency:    string;
+  onUpdateQty: (id: string, delta: number) => void;
+  onRemove:    (id: string) => void;
+  onCheckout:  () => void;
+  loading:     boolean;
+  error:       string | null;
+  onClose:     () => void;
 }): ReactNode {
   return (
     <div className={styles.drawerBackdrop} onClick={onClose}>
-      <div
-        className={styles.drawer}
-        onClick={e => e.stopPropagation()}
-        role="dialog"
-        aria-label="Shopping cart"
-        aria-modal="true"
-      >
+      <div className={styles.drawer} onClick={e => e.stopPropagation()}
+        role="dialog" aria-label="Shopping cart" aria-modal="true">
+
         <div className={styles.drawerHeader}>
           <h2 className={styles.drawerTitle}>Cart</h2>
           <button className={styles.drawerClose} onClick={onClose} aria-label="Close cart">✕</button>
@@ -159,8 +122,8 @@ function CartDrawer({
                   <div className={styles.cartRowBody}>
                     <span className={styles.cartRowName}>
                       {item.detailUrl
-                        ? <Link href={item.detailUrl}>{item.name}</Link>
-                        : item.name}
+                        ? <Link href={item.detailUrl}><CartItemName item={item} /></Link>
+                        : <CartItemName item={item} />}
                     </span>
                     <span className={styles.cartRowPrice}>
                       {formatPrice(item.price * quantity, item.currency ?? currency)}
@@ -179,7 +142,7 @@ function CartDrawer({
 
             <div className={styles.cartSummary}>
               <span className={styles.totalLabel}>Total</span>
-              <span className={styles.totalValue}>{cartTotal(cart, currency)}</span>
+              <span className={styles.totalValue}>{cartTotalPrice(cart, currency)}</span>
             </div>
 
             {error && <p className={styles.checkoutError} role="alert">{error}</p>}
@@ -187,7 +150,6 @@ function CartDrawer({
             <button className={styles.checkoutBtn} onClick={onCheckout} disabled={loading}>
               {loading ? 'Redirecting…' : 'Checkout with Stripe'}
             </button>
-
             <p className={styles.checkoutNote}>
               Secure payment powered by Stripe. Google Pay &amp; Apple Pay accepted.
             </p>
@@ -199,68 +161,140 @@ function CartDrawer({
 }
 
 // ---------------------------------------------------------------------------
+// ProductCard
+// ---------------------------------------------------------------------------
+
+function ProductCard({ item, currency, onAdd }: {
+  item:     ShopItem;
+  currency: string;
+  onAdd:    (item: ShopItem) => void;
+}): ReactNode {
+  const isDigital = item.type === 'digital';
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardImgWrapper}>
+        {item.image && (
+          item.detailUrl
+            ? <Link href={item.detailUrl} tabIndex={-1} aria-hidden>
+                <img src={item.image} alt={item.name} className={styles.cardImg} />
+              </Link>
+            : <img src={item.image} alt={item.name} className={styles.cardImg} />
+        )}
+        {isDigital && (
+          <span className={styles.digitalBadge} aria-label="Digital download" title="Digital download — no physical product">
+            <svg className={styles.digitalIcon} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M8 1v8M5 6l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 11v1a2 2 0 002 2h8a2 2 0 002-2v-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            Digital
+          </span>
+        )}
+      </div>
+      <div className={styles.cardBody}>
+        <h3 className={styles.cardTitle}>
+          {item.detailUrl
+            ? <Link href={item.detailUrl}>{item.name}</Link>
+            : item.name}
+        </h3>
+        {item.description && <p className={styles.cardDesc}>{item.description}</p>}
+        <div className={styles.cardFooter}>
+          <span className={styles.cardPrice}>
+            {formatPrice(item.price, item.currency ?? currency)}
+          </span>
+          <button className={styles.addBtn} onClick={() => onAdd(item)}>
+            Add to cart
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 
-export default function Shop({
-  items,
-  checkoutEndpoint = '/api/create-checkout-session',
-  currency         = 'usd',
-}: ShopProps): ReactNode {
-  const [cart,       setCart      ] = useState<CartEntry[]>(() => loadCart(items));
+export default function StripeShop({
+  config,
+  items:            itemsProp,
+  checkoutEndpoint: endpointProp,
+  currency:         currencyProp = 'chf',
+}: StripeShopProps): ReactNode {
+  const yamlPath = useBaseUrl((config ?? '').replace(/^\//, ''));
+
+  const [items,      setItems     ] = useState<ShopItem[]>(itemsProp ?? []);
+  const [endpoint,   setEndpoint  ] = useState(endpointProp ?? 'https://super-glade-5406.bauermeistermarkusdev.workers.dev/');
+  const [currency,   setCurrency  ] = useState(currencyProp);
+  const [loadErr,    setLoadErr   ] = useState<string | null>(null);
+  const [itemsReady, setItemsReady] = useState(!config);
+
+  // Load catalogue YAML (and per-product YAMLs it references)
+  useEffect(() => {
+    if (!config) { setItems(itemsProp ?? []); setItemsReady(true); return; }
+    let cancelled = false;
+    fetch(yamlPath)
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
+      .then(async text => {
+        if (cancelled) return;
+        const doc = parseYaml(text);
+        const resolved = await loadCatalogueItems(doc);
+        if (cancelled) return;
+        setItems(resolved);
+        if (doc.checkoutEndpoint) setEndpoint(String(doc.checkoutEndpoint));
+        if (doc.currency)         setCurrency(String(doc.currency));
+        setItemsReady(true);
+      })
+      .catch(err => { if (!cancelled) setLoadErr(err.message); });
+    return () => { cancelled = true; };
+  }, [config, yamlPath]);
+
+  // Cart — loaded once from storage on mount, never wiped by the YAML load
+  const [cart,       setCart      ] = useState<CartEntry[]>(() => loadCart());
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [loading,    setLoading   ] = useState(false);
   const [error,      setError     ] = useState<string | null>(null);
 
-  // Persist on every cart change
+  // Persist to sessionStorage after every cart change.
+  // Guard on itemsReady so we never overwrite stored cart with [] during
+  // the async window before the catalogue finishes loading.
   useEffect(() => {
-    saveCart(cart.map(({ item, quantity }) => ({ id: item.id, quantity })));
-  }, [cart]);
+    if (!itemsReady) return;
+    saveCart(cart);
+  }, [cart, itemsReady]);
 
-  // Re-hydrate if another tab/page updated storage (e.g. ProductDetail added an item)
+  // Cross-tab sync only — we intentionally do NOT listen to hf-cart-updated
+  // here because StripeShop is the one dispatching it (via saveCart above).
+  // Listening to our own events would create: save → event → reload → save loop.
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
-      if (e.key === CART_STORAGE_KEY) setCart(loadCart(items));
+      if (e.key === CART_STORAGE_KEY) setCart(loadCart());
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
-  }, [items]);
+  }, []);
 
   const totalItems = cart.reduce((n, e) => n + e.quantity, 0);
 
-  const addToCart = useCallback((item: ShopItem) => {
-    setCart(prev => {
-      const raw = prev.map(e => ({ id: e.item.id, quantity: e.quantity }));
-      const updated = cartAdd(raw, item);
-      return updated.flatMap(({ id, quantity }) => {
-        const it = items.find(i => i.id === id) ?? item;
-        return [{ item: it, quantity }];
-      });
-    });
+  const addToCart  = useCallback((item: ShopItem) => {
+    setCart(prev => cartAdd(prev, item));
     setDrawerOpen(true);
-  }, [items]);
+  }, []);
 
-  const updateQty = useCallback((id: string, delta: number) => {
-    setCart(prev => {
-      const raw = cartUpdate(prev.map(e => ({ id: e.item.id, quantity: e.quantity })), id, delta);
-      return raw.flatMap(({ id: rid, quantity }) => {
-        const it = prev.find(e => e.item.id === rid)?.item;
-        return it ? [{ item: it, quantity }] : [];
-      });
-    });
+  const updateQty  = useCallback((id: string, delta: number) => {
+    setCart(prev => cartUpdate(prev, id, delta));
   }, []);
 
   const removeItem = useCallback((id: string) => {
-    setCart(prev => prev.filter(e => e.item.id !== id));
+    setCart(prev => cartRemove(prev, id));
   }, []);
 
   const handleCheckout = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(checkoutEndpoint, {
+      const res = await fetch(endpoint, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body:    JSON.stringify({ lineItems: cart.map(({ item, quantity }) => ({ itemId: item.id, quantity })) }),
       });
       if (!res.ok) throw new Error(await res.text() || `Server error ${res.status}`);
@@ -275,15 +309,23 @@ export default function Shop({
     }
   };
 
+  if (loadErr) {
+    return (
+      <div style={{ border: '1px solid var(--ifm-color-danger)', padding: '1rem', borderRadius: 4 }}>
+        <strong>StripeShop error:</strong> {loadErr}
+      </div>
+    );
+  }
+
   return (
     <div className={styles.shop}>
-      <div className={styles.cartBtnWrapper}>
+      {/* <div className={styles.cartBtnWrapper}>
         <button className={styles.cartBtn} onClick={() => setDrawerOpen(true)}
           aria-label={`Open cart, ${totalItems} item${totalItems !== 1 ? 's' : ''}`}>
           🛒
           {totalItems > 0 && <span className={styles.cartBadge}>{totalItems}</span>}
         </button>
-      </div>
+      </div> */}
 
       <div className={styles.grid}>
         {items.map(item => (

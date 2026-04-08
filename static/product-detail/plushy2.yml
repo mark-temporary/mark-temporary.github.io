@@ -1,0 +1,23 @@
+id:          ferret-plushie-white
+name:        Ferret Plushie (White)
+price:       29.90
+currency:    chf
+maxQuantity: 10
+type:        digital
+image:       /img/shop/plushy2.png
+detailUrl:   /product-detail/plushy2
+description: A soft white ferret friend for your desk.
+
+images:
+  - /img/shop/plushy2.png
+
+body: |
+  ## About this product
+
+  The white edition of our beloved Ferret Plushie.
+
+facts:
+  - label: Material
+    value: Organic cotton
+  - label: Ships within
+    value: 2–3 business days

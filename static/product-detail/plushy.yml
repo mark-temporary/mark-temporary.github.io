@@ -1,15 +1,19 @@
-# --- Shop item (id/price/currency must match the Shop items array) ---
+# Single source of truth for this product.
+# Read by both StripeShop (grid card) and ProductDetail (detail page).
+
 id:          ferret-plushie
 name:        Ferret Plushie
-price:       2990
+price:       29.90
 currency:    chf
-maxQuantity: 10
+maxQuantity: 15
+type:        physical
+image:       /img/shop/plushy.png
+detailUrl:   /product-detail/plushy
+description: A soft ferret friend for your desk.
 
-# --- Detail page ---
 images:
   - /img/shop/plushy.png
   - /img/shop/plushy2.png
-
 
 body: |
   ## About this product
