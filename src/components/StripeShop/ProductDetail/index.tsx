@@ -45,7 +45,7 @@ import type { ReactNode } from 'react';
 import React, { useEffect, useState, useCallback } from 'react';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import ReactMarkdown from 'react-markdown';
-import type { ShopItem } from '@site/src/components/StripeShop/types';
+import type { ShopItem, ProductVariant } from '@site/src/components/StripeShop/types';
 import {
   type CartEntry,
   CART_STORAGE_KEY,
@@ -71,17 +71,32 @@ interface ProductDetailData extends ShopItem {
 }
 
 function validateData(raw: YamlMap): ProductDetailData {
-  const missing = ['id','name','price','images'].filter(k => !raw[k]);
-  if (missing.length) throw new Error(`Product YAML missing: ${missing.join(', ')}`);
+  if (!raw.id || !raw.name || !raw.images) {
+    throw new Error(`Product YAML missing: ${['id','name','images'].filter(k => !raw[k]).join(', ')}`);
+  }
+
+  const rawVariants = raw.variants as YamlMap[] | undefined;
+  const variants: ProductVariant[] | undefined = Array.isArray(rawVariants)
+    ? rawVariants.map(v => ({
+        id:       String(v.id),
+        label:    String(v.label),
+        price:    parsePrice(v.price),
+        currency: v.currency ? String(v.currency) : undefined,
+      }))
+    : undefined;
+
+  if (!variants && !raw.price) throw new Error('Product YAML missing price (or variants).');
+
   return {
     id:               String(raw.id),
     name:             String(raw.name),
-    price:            parsePrice(raw.price),
+    price:            variants ? variants[0].price : parsePrice(raw.price),
     currency:         raw.currency    ? String(raw.currency)    : 'usd',
     maxQuantity:      raw.maxQuantity ? Number(raw.maxQuantity) : undefined,
     type:             raw.type === 'digital' ? 'digital' : 'physical',
     image:            raw.image     ? String(raw.image)     : undefined,
     detailUrl:        raw.detailUrl ? String(raw.detailUrl) : undefined,
+    variants,
     images:           (raw.images as string[]),
     body:             raw.body   ? String(raw.body)   : undefined,
     checkoutEndpoint: raw.checkoutEndpoint ? String(raw.checkoutEndpoint) : undefined,
@@ -145,6 +160,7 @@ export default function ProductDetail({ config }: { config: string }): ReactNode
   const [added,      setAdded     ] = useState(false);
   const [loading,    setLoading   ] = useState(false);
   const [checkoutErr,setCheckoutErr] = useState<string | null>(null);
+  const [selectedVariantId, setSelectedVariantId] = useState<string>('');
 
   const yamlPath = useBaseUrl(config.replace(/^\//, ''));
 
@@ -153,7 +169,13 @@ export default function ProductDetail({ config }: { config: string }): ReactNode
     let cancelled = false;
     fetch(yamlPath)
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
-      .then(text => { if (!cancelled) setData(validateData(parseYaml(text))); })
+      .then(text => {
+        if (!cancelled) {
+          const d = validateData(parseYaml(text));
+          setData(d);
+          if (d.variants && d.variants.length > 0) setSelectedVariantId(d.variants[0].id);
+        }
+      })
       .catch(err => { if (!cancelled) setFetchError(err.message); });
     return () => { cancelled = true; };
   }, [yamlPath]);
@@ -176,24 +198,36 @@ export default function ProductDetail({ config }: { config: string }): ReactNode
 
   const handleAdd = useCallback(() => {
     if (!data) return;
+    const selectedVariant = data.variants?.find(v => v.id === selectedVariantId);
+    const cartItem: ShopItem = selectedVariant
+      ? {
+          ...data,
+          id:       selectedVariant.id,
+          name:     `${data.name} — ${selectedVariant.label}`,
+          price:    selectedVariant.price,
+          currency: selectedVariant.currency ?? data.currency,
+          variants: undefined,
+        }
+      : { ...data, variants: undefined };
+
     setCart(prev => {
-      const updated = cartAdd(prev, data);
+      const updated = cartAdd(prev, cartItem);
       saveCart(updated);
       return updated;
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
-  }, [data]);
+  }, [data, selectedVariantId]);
 
   const handleCheckout = async () => {
     if (!data) return;
     setLoading(true);
     setCheckoutErr(null);
-    const endpoint = data.checkoutEndpoint ?? 'https://super-glade-5406.bauermeistermarkusdev.workers.dev/';
+    const endpoint = data.checkoutEndpoint ?? '/api/create-checkout-session';
     try {
       const res = await fetch(endpoint, {
         method:  'POST',
-        headers: { 'Content-Type': 'text/plain' },
+        headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ lineItems: cart.map(({ item, quantity }) => ({ itemId: item.id, quantity })) }),
       });
       if (!res.ok) throw new Error(await res.text() || `Server error ${res.status}`);
@@ -222,13 +256,22 @@ export default function ProductDetail({ config }: { config: string }): ReactNode
   }
 
   const currency = data.currency ?? 'usd';
-  const inCart   = cart.find(e => e.item.id === data.id)?.quantity ?? 0;
+  const hasVariants = data.variants && data.variants.length > 0;
+  const selectedVariant = hasVariants
+    ? data.variants!.find(v => v.id === selectedVariantId) ?? data.variants![0]
+    : null;
+  const displayPrice = selectedVariant
+    ? formatPrice(selectedVariant.price, selectedVariant.currency ?? currency)
+    : formatPrice(data.price, currency);
+  const inCart = cart.find(e =>
+    e.item.id === (selectedVariant ? selectedVariant.id : data.id)
+  )?.quantity ?? 0;
 
   return (
     <div className={styles.page}>
 
-      {/* ── Floating cart button ─────────────────────────────────────────
-      <div className={styles.cartBtnWrapper}>
+      {/* ── Floating cart button ───────────────────────────────────────── */}
+      {/* <div className={styles.cartBtnWrapper}>
         <button className={styles.cartBtn}
           onClick={() => setDrawerOpen(true)}
           aria-label={`Open cart, ${totalItems} item${totalItems !== 1 ? 's' : ''}`}>
@@ -253,9 +296,7 @@ export default function ProductDetail({ config }: { config: string }): ReactNode
         {/* Right — product summary / facts */}
         <aside className={styles.summary}>
           <h2 className={styles.summaryTitle}>{data.name}</h2>
-          <p className={styles.summaryPrice}>
-            {formatPrice(data.price, currency)}
-          </p>
+          <p className={styles.summaryPrice}>{displayPrice}</p>
 
           {data.facts && data.facts.length > 0 && (
             <dl className={styles.facts}>
@@ -266,6 +307,19 @@ export default function ProductDetail({ config }: { config: string }): ReactNode
                 </div>
               ))}
             </dl>
+          )}
+
+          {hasVariants && (
+            <select
+              className={styles.variantSelect}
+              value={selectedVariantId}
+              onChange={e => setSelectedVariantId(e.target.value)}
+              aria-label="Select variant"
+            >
+              {data.variants!.map(v => (
+                <option key={v.id} value={v.id}>{v.label}</option>
+              ))}
+            </select>
           )}
 
           <button

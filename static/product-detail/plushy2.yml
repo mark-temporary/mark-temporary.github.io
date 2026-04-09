@@ -21,3 +21,18 @@ facts:
     value: Organic cotton
   - label: Ships within
     value: 2–3 business days
+
+  
+variants:
+  - id:    ferret-tshirt-red-s
+    label: Red / S
+    price: 24.90
+    currency: chf
+  - id:    ferret-tshirt-red-m
+    label: Red / M
+    price: 24.90
+    currency: chf
+  - id:    ferret-tshirt-blue-s
+    label: Blue / S
+    price: 27.90
+    currency: chf

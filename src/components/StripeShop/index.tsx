@@ -25,7 +25,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import styles from './styles.module.css';
-import type { ShopItem } from './types';
+import type { ShopItem, ProductVariant } from './types';
 import {
   type CartEntry,
   CART_STORAGE_KEY,
@@ -55,19 +55,32 @@ export interface StripeShopProps {
 // ---------------------------------------------------------------------------
 
 function shopItemFromYaml(r: YamlMap): ShopItem {
-  if (!r.id || !r.name || !r.price) {
-    throw new Error(`Product YAML is missing id, name, or price.`);
-  }
+  if (!r.id || !r.name) throw new Error(`Product YAML is missing id or name.`);
+
+  const rawVariants = r.variants as YamlMap[] | undefined;
+  const variants: ProductVariant[] | undefined = Array.isArray(rawVariants)
+    ? rawVariants.map(v => ({
+        id:       String(v.id),
+        label:    String(v.label),
+        price:    parsePrice(v.price),
+        currency: v.currency ? String(v.currency) : undefined,
+      }))
+    : undefined;
+
+  // price is required only when there are no variants
+  if (!variants && !r.price) throw new Error(`Product YAML is missing price (or variants).`);
+
   return {
     id:          String(r.id),
     name:        String(r.name),
-    price:       parsePrice(r.price),
+    price:       variants ? variants[0].price : parsePrice(r.price),
     currency:    r.currency    ? String(r.currency)    : undefined,
     maxQuantity: r.maxQuantity ? Number(r.maxQuantity) : undefined,
     image:       r.image       ? String(r.image)       : undefined,
     detailUrl:   r.detailUrl   ? String(r.detailUrl)   : undefined,
     type:        r.type === 'digital' ? 'digital' : 'physical',
     description: r.description ? String(r.description) : undefined,
+    variants,
   };
 }
 
@@ -170,6 +183,35 @@ function ProductCard({ item, currency, onAdd }: {
   onAdd:    (item: ShopItem) => void;
 }): ReactNode {
   const isDigital = item.type === 'digital';
+  const hasVariants = item.variants && item.variants.length > 0;
+  const [selectedVariantId, setSelectedVariantId] = useState(
+    hasVariants ? item.variants![0].id : ''
+  );
+
+  const selectedVariant = hasVariants
+    ? item.variants!.find(v => v.id === selectedVariantId) ?? item.variants![0]
+    : null;
+
+  const displayPrice  = selectedVariant
+    ? formatPrice(selectedVariant.price, selectedVariant.currency ?? item.currency ?? currency)
+    : formatPrice(item.price, item.currency ?? currency);
+
+  const handleAdd = () => {
+    if (selectedVariant) {
+      // Flatten the variant into a cart-ready ShopItem
+      onAdd({
+        ...item,
+        id:       selectedVariant.id,
+        name:     `${item.name} — ${selectedVariant.label}`,
+        price:    selectedVariant.price,
+        currency: selectedVariant.currency ?? item.currency,
+        variants: undefined, // cart entries are always flat
+      });
+    } else {
+      onAdd(item);
+    }
+  };
+
   return (
     <div className={styles.card}>
       <div className={styles.cardImgWrapper}>
@@ -197,11 +239,23 @@ function ProductCard({ item, currency, onAdd }: {
             : item.name}
         </h3>
         {item.description && <p className={styles.cardDesc}>{item.description}</p>}
+
+        {hasVariants && (
+          <select
+            className={styles.variantSelect}
+            value={selectedVariantId}
+            onChange={e => setSelectedVariantId(e.target.value)}
+            aria-label="Select variant"
+          >
+            {item.variants!.map(v => (
+              <option key={v.id} value={v.id}>{v.label}</option>
+            ))}
+          </select>
+        )}
+
         <div className={styles.cardFooter}>
-          <span className={styles.cardPrice}>
-            {formatPrice(item.price, item.currency ?? currency)}
-          </span>
-          <button className={styles.addBtn} onClick={() => onAdd(item)}>
+          <span className={styles.cardPrice}>{displayPrice}</span>
+          <button className={styles.addBtn} onClick={handleAdd}>
             Add to cart
           </button>
         </div>
@@ -218,12 +272,12 @@ export default function StripeShop({
   config,
   items:            itemsProp,
   checkoutEndpoint: endpointProp,
-  currency:         currencyProp = 'chf',
+  currency:         currencyProp = 'usd',
 }: StripeShopProps): ReactNode {
   const yamlPath = useBaseUrl((config ?? '').replace(/^\//, ''));
 
   const [items,      setItems     ] = useState<ShopItem[]>(itemsProp ?? []);
-  const [endpoint,   setEndpoint  ] = useState(endpointProp ?? 'https://super-glade-5406.bauermeistermarkusdev.workers.dev/');
+  const [endpoint,   setEndpoint  ] = useState(endpointProp ?? '/api/create-checkout-session');
   const [currency,   setCurrency  ] = useState(currencyProp);
   const [loadErr,    setLoadErr   ] = useState<string | null>(null);
   const [itemsReady, setItemsReady] = useState(!config);
@@ -294,7 +348,7 @@ export default function StripeShop({
     try {
       const res = await fetch(endpoint, {
         method:  'POST',
-        headers: { 'Content-Type': 'text/plain' },
+        headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ lineItems: cart.map(({ item, quantity }) => ({ itemId: item.id, quantity })) }),
       });
       if (!res.ok) throw new Error(await res.text() || `Server error ${res.status}`);
