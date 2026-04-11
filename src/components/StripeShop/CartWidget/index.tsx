@@ -30,7 +30,7 @@ import {
   loadCart, saveCart, clearCart,
   cartUpdate, cartRemove,
   cartTotalItems, cartTotalPrice,
-  formatPrice, loadCountry, saveCountry,
+  formatPrice, loadCountry, saveCountry, isDigitalOnly,
 } from '@site/src/components/StripeShop/cart';
 import { CartItemName } from '@site/src/components/StripeShop/CartDisplay';
 import { SHIPPING_COUNTRIES } from '@site/src/components/StripeShop/countries';
@@ -107,8 +107,9 @@ export default function CartWidget({
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
-          lineItems: cart.map(({ item, quantity }) => ({ itemId: item.id, quantity })),
+          lineItems:   cart.map(({ item, quantity }) => ({ itemId: item.id, quantity })),
           country,
+          digitalOnly: isDigitalOnly(cart),
         }),
       });
       if (!res.ok) throw new Error(await res.text() || `Server error ${res.status}`);
@@ -124,6 +125,7 @@ export default function CartWidget({
   };
 
   const displayCurrency = cart[0]?.item.currency ?? currency;
+  const digitalOnly     = isDigitalOnly(cart);
 
   return (
     <>
@@ -198,27 +200,29 @@ export default function CartWidget({
                   <span className={styles.totalValue}>{cartTotalPrice(cart, displayCurrency)}</span>
                 </div>
 
-                <div className={styles.countryRow}>
-                  <label htmlFor="cw-country" className={styles.countryLabel}>Ship to</label>
-                  <select
-                    id="cw-country"
-                    className={styles.countrySelect}
-                    value={country}
-                    onChange={e => { setCountry(e.target.value); saveCountry(e.target.value); }}
-                  >
-                    <option value="">— Select country —</option>
-                    {SHIPPING_COUNTRIES.map(c => (
-                      <option key={c.code} value={c.code}>{c.label}</option>
-                    ))}
-                  </select>
-                </div>
+                {!digitalOnly && (
+                  <div className={styles.countryRow}>
+                    <label htmlFor="cw-country" className={styles.countryLabel}>Ship to</label>
+                    <select
+                      id="cw-country"
+                      className={styles.countrySelect}
+                      value={country}
+                      onChange={e => { setCountry(e.target.value); saveCountry(e.target.value); }}
+                    >
+                      <option value="">— Select country —</option>
+                      {SHIPPING_COUNTRIES.map(c => (
+                        <option key={c.code} value={c.code}>{c.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
                 {error && <p className={styles.error} role="alert">{error}</p>}
 
-                <button className={styles.checkoutBtn} onClick={handleCheckout} disabled={loading || !country}>
+                <button className={styles.checkoutBtn} onClick={handleCheckout} disabled={loading || (!digitalOnly && !country)}>
                   {loading ? 'Redirecting…' : 'Checkout with Stripe'}
                 </button>
-                {!country && (
+                {!digitalOnly && !country && (
                   <p className={styles.countryHint}>Please select a shipping country to continue.</p>
                 )}
                 <p className={styles.checkoutNote}>

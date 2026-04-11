@@ -120,6 +120,11 @@ export function cartTotalItems(current: CartEntry[]): number {
   return current.reduce((n, e) => n + e.quantity, 0);
 }
 
+/** True when every item in the cart is a digital product (no shipping needed). */
+export function isDigitalOnly(current: CartEntry[]): boolean {
+  return current.length > 0 && current.every(e => e.item.type === 'digital');
+}
+
 export function cartTotalPrice(current: CartEntry[], defaultCurrency: string): string {
   if (current.length === 0) return '';
   const currency = (current[0].item.currency ?? defaultCurrency).toUpperCase();

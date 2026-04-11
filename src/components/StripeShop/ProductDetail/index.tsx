@@ -51,7 +51,7 @@ import {
   CART_STORAGE_KEY,
   loadCart, saveCart, clearCart,
   cartAdd, cartUpdate, cartRemove, cartTotalItems,
-  formatPrice, parsePrice,
+  formatPrice, parsePrice, isDigitalOnly,
 } from '@site/src/components/StripeShop/cart';
 import { parseYaml, type YamlMap } from '@site/src/components/StripeShop/yaml';
 import styles from './styles.module.css';
@@ -223,7 +223,7 @@ export default function ProductDetail({ config }: { config: string }): ReactNode
     if (!data) return;
     setLoading(true);
     setCheckoutErr(null);
-    const endpoint = data.checkoutEndpoint ?? 'https://super-glade-5406.bauermeistermarkusdev.workers.dev/';
+    const endpoint = data.checkoutEndpoint ?? '/api/create-checkout-session';
     try {
       const res = await fetch(endpoint, {
         method:  'POST',
@@ -231,6 +231,7 @@ export default function ProductDetail({ config }: { config: string }): ReactNode
         body:    JSON.stringify({
           lineItems: cart.map(({ item, quantity }) => ({ itemId: item.id, quantity })),
           country,
+          digitalOnly: isDigitalOnly(cart),
         }),
       });
       if (!res.ok) throw new Error(await res.text() || `Server error ${res.status}`);

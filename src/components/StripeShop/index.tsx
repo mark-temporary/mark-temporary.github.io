@@ -31,7 +31,8 @@ import {
   CART_STORAGE_KEY,
   loadCart, saveCart, clearCart,
   cartAdd, cartUpdate, cartRemove,
-  cartTotalPrice, formatPrice, parsePrice, loadCountry, saveCountry,
+  cartTotalPrice, formatPrice, parsePrice,
+  loadCountry, saveCountry, isDigitalOnly,
 } from './cart';
 import { parseYaml, type YamlMap } from './yaml';
 import { CartItemName } from './CartDisplay';
@@ -114,6 +115,7 @@ function CartDrawer({ cart, currency, onUpdateQty, onRemove, onCheckout, loading
   onClose:     () => void;
 }): ReactNode {
   const [country, setCountry] = React.useState(() => loadCountry());
+  const digitalOnly = isDigitalOnly(cart);
 
   return (
     <div className={styles.drawerBackdrop} onClick={onClose}>
@@ -161,33 +163,35 @@ function CartDrawer({ cart, currency, onUpdateQty, onRemove, onCheckout, loading
               <span className={styles.totalValue}>{cartTotalPrice(cart, currency)}</span>
             </div>
 
-            <div className={styles.countryRow}>
-              <label htmlFor="cart-country" className={styles.countryLabel}>
-                Ship to
-              </label>
-              <select
-                id="cart-country"
-                className={styles.countrySelect}
-                value={country}
-                onChange={e => { setCountry(e.target.value); saveCountry(e.target.value); }}
-              >
-                <option value="">— Select country —</option>
-                {SHIPPING_COUNTRIES.map(c => (
-                  <option key={c.code} value={c.code}>{c.label}</option>
-                ))}
-              </select>
-            </div>
+            {!digitalOnly && (
+              <div className={styles.countryRow}>
+                <label htmlFor="cart-country" className={styles.countryLabel}>
+                  Ship to
+                </label>
+                <select
+                  id="cart-country"
+                  className={styles.countrySelect}
+                  value={country}
+                  onChange={e => { setCountry(e.target.value); saveCountry(e.target.value); }}
+                >
+                  <option value="">— Select country —</option>
+                  {SHIPPING_COUNTRIES.map(c => (
+                    <option key={c.code} value={c.code}>{c.label}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {error && <p className={styles.checkoutError} role="alert">{error}</p>}
 
             <button
               className={styles.checkoutBtn}
               onClick={() => onCheckout(country)}
-              disabled={loading || !country}
+              disabled={loading || (!digitalOnly && !country)}
             >
               {loading ? 'Redirecting…' : 'Checkout with Stripe'}
             </button>
-            {!country && (
+            {!digitalOnly && !country && (
               <p className={styles.countryHint}>Please select a shipping country to continue.</p>
             )}
             <p className={styles.checkoutNote}>
@@ -377,8 +381,9 @@ export default function StripeShop({
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
-          lineItems: cart.map(({ item, quantity }) => ({ itemId: item.id, quantity })),
+          lineItems:   cart.map(({ item, quantity }) => ({ itemId: item.id, quantity })),
           country,
+          digitalOnly: isDigitalOnly(cart),
         }),
       });
       if (!res.ok) throw new Error(await res.text() || `Server error ${res.status}`);

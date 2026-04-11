@@ -10,7 +10,7 @@ import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import Link from '@docusaurus/Link';
 import type { CartEntry } from '@site/src/components/StripeShop/cart';
-import { formatPrice, cartTotalPrice, loadCountry, saveCountry } from '@site/src/components/StripeShop/cart';
+import { formatPrice, cartTotalPrice, loadCountry, saveCountry, isDigitalOnly } from '@site/src/components/StripeShop/cart';
 import { CartItemName } from '@site/src/components/StripeShop/CartDisplay';
 import { SHIPPING_COUNTRIES } from '@site/src/components/StripeShop/countries';
 import styles from './styles.module.css';
@@ -36,6 +36,7 @@ export function CartDrawerStandalone({
 }): ReactNode {
   const displayCurrency = cart[0]?.item.currency ?? currency;
   const [country, setCountry] = useState(() => loadCountry());
+  const digitalOnly = isDigitalOnly(cart);
 
   return (
     <div className={styles.drawerBackdrop} onClick={onClose}>
@@ -87,27 +88,29 @@ export function CartDrawerStandalone({
               <span className={styles.totalValue}>{cartTotalPrice(cart, displayCurrency)}</span>
             </div>
 
-            <div className={styles.countryRow}>
-              <label htmlFor="pd-country" className={styles.countryLabel}>Ship to</label>
-              <select
-                id="pd-country"
-                className={styles.countrySelect}
-                value={country}
-                onChange={e => { setCountry(e.target.value); saveCountry(e.target.value); }}
-              >
-                <option value="">— Select country —</option>
-                {SHIPPING_COUNTRIES.map(c => (
-                  <option key={c.code} value={c.code}>{c.label}</option>
-                ))}
-              </select>
-            </div>
+            {!digitalOnly && (
+              <div className={styles.countryRow}>
+                <label htmlFor="pd-country" className={styles.countryLabel}>Ship to</label>
+                <select
+                  id="pd-country"
+                  className={styles.countrySelect}
+                  value={country}
+                  onChange={e => { setCountry(e.target.value); saveCountry(e.target.value); }}
+                >
+                  <option value="">— Select country —</option>
+                  {SHIPPING_COUNTRIES.map(c => (
+                    <option key={c.code} value={c.code}>{c.label}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {error && <p className={styles.checkoutError} role="alert">{error}</p>}
 
-            <button className={styles.checkoutBtn} onClick={() => onCheckout(country)} disabled={loading || !country}>
+            <button className={styles.checkoutBtn} onClick={() => onCheckout(country)} disabled={loading || (!digitalOnly && !country)}>
               {loading ? 'Redirecting…' : 'Checkout with Stripe'}
             </button>
-            {!country && (
+            {!digitalOnly && !country && (
               <p className={styles.countryHint}>Please select a shipping country to continue.</p>
             )}
             <p className={styles.checkoutNote}>
