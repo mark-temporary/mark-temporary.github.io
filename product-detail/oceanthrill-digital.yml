@@ -1,0 +1,28 @@
+id:          oceanthrill-digital
+name:        OceanThrill Murder Mystery
+price:       10.95
+currency:    chf
+type:        digital
+image:       /img/OceanThrill.png
+detailUrl:   /product-detail/oceanthrill-digital
+description: Enjoy a download of OceanThrill Murder Mystery for all supported platforms, once it becomes available.
+
+images:
+  - /img/shop/OceanThrill/1.png
+  - /img/shop/OceanThrill/2.png
+  - /img/shop/OceanThrill/3.png
+
+body: |
+  ## In this adventure, worse things await you than being eaten by a grue.
+
+  A missing submersible, a group of rich adventurers who vanished on the way to the wreck of the RMS Lusitania and, on top of it all, the Interim CEO of OceanThrill (owner and operator of the missing Kepler 1 sub) murdered at his own private beachfront.
+
+  This is the plot of Happy Ferret Entertainment's first in an upcoming series of mystery adventure games, presented in glorious 8 and 16 bit.
+
+  In this interactive fiction in the tradition of past text adventure (sic) greats, you follow in the footsteps of a weary yet witty detective and his adorably mouthy female partner as they uncover a deep web of lies, intrigue and subversion.
+
+facts:
+  - label: Contents
+    value: All versions of the game as digital downloads
+  - label: Release date
+    value: Christmas 2024

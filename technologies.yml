@@ -4,7 +4,7 @@ items:
       A supercharged SCUMM v6 derivative,
       the SCUNK engine is the backbone of all 2D multiplatform developments here at Happy-Ferret Entertainment. 
     img: "/img/SCUNK.svg"
-    URL: "https://happy-ferret.com/games/ferret-quest"
+    # URL: "https://happy-ferret.com/games/ferret-quest"
     tags: 
       - Amiga
       - AtariST
@@ -32,7 +32,7 @@ items:
       StoryBun modernizes the developer tooling while featuring a new rendering pipeline entirely focused
       on current generation platforms. 
     img: "/img/StoryBun.svg"
-    URL: "https://happy-ferret.com/games/ferret-quest"
+    # URL: "https://happy-ferret.com/games/ferret-quest"
     tags:
       - Windows
       - macOS
@@ -40,3 +40,15 @@ items:
       - Xbox Series
       - Android
       - iOS
+
+  - title: "PuzzleCharter"
+    description: >
+      A puzzle dependency chart editor inspired by Chris Ainsley's
+      Puzzlon and Ron Gilbert's  writing on adventure-game puzzle design.
+    img: "/img/PuzzleCharter.png"
+    URL: "https://happy-ferret.com/PuzzleCharter"
+    tags:
+      - Windows (Coming Soon)
+      - macOS (Coming Soon)
+      - GNU/Linux (Coming Soon)
+      - Web

@@ -1,0 +1,11 @@
+# Shop catalogue — lists product config files.
+# All item data (price, name, images, facts) lives in each product file.
+# Nothing is duplicated.
+ 
+checkoutEndpoint: https://super-glade-5406.bauermeistermarkusdev.workers.dev/
+currency: chf
+ 
+items:
+  - config: product-detail/oceanthrill-digital.yml
+  - config: product-detail/oceanthrill-box.yml
+  - config: product-detail/oceanthrill-big.yml
