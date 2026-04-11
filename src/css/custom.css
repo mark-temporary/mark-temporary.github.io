@@ -21,7 +21,12 @@
   --hf-neon-outer:  #1a5c3a;
 }
 
+[data-theme='light'] {
+  --hf-background-color: #ffffff;
+}
+
 [data-theme='dark'] {
+  --hf-background-color: var(--ifm-background-color);
   --ifm-color-primary: #25c2a0;
   --ifm-color-primary-dark: #21af90;
   --ifm-color-primary-darker: #1fa588;
@@ -283,4 +288,14 @@
 [data-theme='dark'] .hf-neon-tagline {
   /* Dark mode: black text */
   color: #ffffff;
+}
+
+.cookie-consent-modal {
+  background-color: var(--hf-background-color)!important;
+  border: 2px solid var(--ifm-color-primary)!important;
+  border-radius: 4px!important;
+  box-shadow:
+    0 0 0 1px var(--ifm-color-primary-darker),
+    0 0 24px 4px color-mix(in srgb, var(--ifm-color-primary) 40%, transparent),
+    inset 0 0 40px rgba(0,0,0,0.5)!important;
 }

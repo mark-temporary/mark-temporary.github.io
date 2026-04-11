@@ -1,0 +1,24 @@
+id:          oceanthrill-digital
+name:        OceanThrill Murder Mystery
+price:       10.95
+currency:    chf
+type:        digital
+image:       /img/OceanThrill.png
+detailUrl:   /product-detail/oceanthrill-digital
+description: A soft white ferret friend for your desk.
+
+images:
+  - /img/shop/OceanThrill/1.png
+  - /img/shop/OceanThrill/2.png
+  - /img/shop/OceanThrill/3.png
+
+body: |
+  ## About this product
+
+  The white edition of our beloved Ferret Plushie.
+
+facts:
+  - label: Material
+    value: Organic cotton
+  - label: Ships within
+    value: 2–3 business days

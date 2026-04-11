@@ -6,6 +6,6 @@ checkoutEndpoint: https://super-glade-5406.bauermeistermarkusdev.workers.dev/
 currency: chf
  
 items:
-  - config: product-detail/plushy.yml
-  - config: product-detail/plushy2.yml
- 
+  - config: product-detail/oceanthrill-digital.yml
+  - config: product-detail/oceanthrill-box.yml
+  - config: product-detail/oceanthrill-big.yml

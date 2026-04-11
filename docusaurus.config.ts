@@ -47,19 +47,19 @@ const config: Config = {
 
   onBrokenLinks: 'throw',
 
-  plugins: [
-    [
-      'docusaurus-plugin-cookie-consent',
-      {
-        title: 'Cookie Consent',
-        description: 'We use cookies to enhance your browsing experience and analyze our traffic.',
-        links: [
-          { label: 'Privacy Policy', href: '/privacy' },
-          { label: 'Cookie Policy', href: '/cookies' },
-        ],
-      },
-    ],
-  ],
+  // plugins: [
+  //   [
+  //     'docusaurus-plugin-cookie-consent',
+  //     {
+  //       title: 'Cookie Consent',
+  //       description: 'We use cookies to enhance your browsing experience and analyze our traffic.',
+  //       links: [
+  //         { label: 'Privacy Policy', href: '/privacy' },
+  //         { label: 'Cookie Policy', href: '/cookies' },
+  //       ],
+  //     },
+  //   ],
+  // ],
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
@@ -118,7 +118,7 @@ const config: Config = {
         {to: '/games', label: 'Games', position: 'left'},
         {to: '/blog', label: 'Blog', position: 'left'},
         {to: '/technologies', label: 'Technologies', position: 'left'},
-        {to: '/shop', label: 'Shop', position: 'left'},
+        {to: '/shop', label: 'Shop 🛍️', position: 'left'},
         {to: '/contact', label: 'Contact', position: 'right'},
         {to: '/memorial', label: 'Halls of the Fallen', position: 'right'},
       ],

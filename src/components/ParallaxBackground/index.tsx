@@ -11,7 +11,10 @@
 
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef, useCallback, useState } from 'react';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import styles from './styles.module.css';
+
+import type { OpeningHours } from '@site/docusaurus.config';
 
 const FACTORS = [0.02, 0.05, 0.09, 0.14, 0.20];
 const snap = (n: number, grid = 2) => Math.round(n / grid) * grid;
@@ -20,6 +23,26 @@ const snap = (n: number, grid = 2) => Math.round(n / grid) * grid;
 function makeLCG(seed: number) {
   let s = seed;
   return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
+}
+
+// Returns { hour, day } in the given IANA timezone, derived from UTC
+// so the result is consistent for all visitors regardless of their locale.
+function getNowIn(timezone: string): { hour: number; day: number } {
+    const now = new Date();
+    const hour = parseInt(
+      new Intl.DateTimeFormat('en-GB', { timeZone: timezone, hour: 'numeric', hour12: false }).format(now),
+      10,
+    );
+    // 'en-GB' weekday: 'long' gives e.g. "Monday" — we need the JS day number
+    // (0=Sun … 6=Sat), so we use 'en-US' numeric which gives "1"–"7" (Sun=1).
+    const dayStr = new Intl.DateTimeFormat('en-US', { timeZone: timezone, weekday: 'short' }).format(now);
+    const dayMap: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    return { hour, day: dayMap[dayStr] ?? now.getDay() };
+}
+   
+function checkIsOpen(oh: OpeningHours): boolean {
+    const { hour, day } = getNowIn(oh.timezone);
+    return oh.openDays.includes(day) && hour >= oh.openHour && hour < oh.closeHour;
 }
 
 export default function ParallaxBackground(): ReactNode {
@@ -266,6 +289,11 @@ function NeonSign({ x, y, text, color, size, filterId, className }: NeonProps) {
 }
 
 function MidCity() {
+  const { siteConfig } = useDocusaurusContext();
+  // Evaluate against the opening hours defined in docusaurus.config.ts.
+  const openingHours = siteConfig.customFields?.openingHours as OpeningHours;
+  const [isOpen, setIsOpen] = useState(() => checkIsOpen(openingHours));
+
   return (
     <g>
       {/* ── Building A ── */}
@@ -307,7 +335,7 @@ function MidCity() {
       <rect x="1160" y="280" width="180" height="320" fill="#0b1c14" />
       <rect x="1160" y="280" width="180" height="8"   fill="#0f2a1c" />
       <Windows x={1170} y={296} cols={4} rows={7} gap={10} ww={14} wh={9} litColor="#ffe890" litChance={0.45} />
-      <NeonSign x={1178} y={436} text="OPEN" color="#ff4da6" size={15} filterId="pb-neon-pink" className={styles.neonOpen} />
+      <NeonSign x={1178} y={436} text={isOpen ? "OPEN" : "CLOSED"} color="#ff4da6" size={15} filterId="pb-neon-pink" className={styles.neonOpen} />
       {/* OPEN road spill — pink */}
       <rect x="1162" y="536" width="176" height="8" rx="4"
         fill="rgba(255,77,166,0.16)" className={styles.spillOpen} />
