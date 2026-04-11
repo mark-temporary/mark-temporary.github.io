@@ -62,6 +62,26 @@ export function clearCart(): void {
 }
 
 // ---------------------------------------------------------------------------
+// Country persistence
+// ---------------------------------------------------------------------------
+
+const COUNTRY_STORAGE_KEY = 'hf-shop-country';
+
+export function loadCountry(): string {
+  try {
+    return sessionStorage.getItem(COUNTRY_STORAGE_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+
+export function saveCountry(code: string): void {
+  try {
+    sessionStorage.setItem(COUNTRY_STORAGE_KEY, code);
+  } catch {}
+}
+
+// ---------------------------------------------------------------------------
 // Mutations — all return a new CartEntry[] (never mutate in place)
 // ---------------------------------------------------------------------------
 

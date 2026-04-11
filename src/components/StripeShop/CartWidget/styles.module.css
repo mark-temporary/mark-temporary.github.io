@@ -9,6 +9,7 @@
     align-items: center;
     justify-content: center;
     width: 36px;
+    height: 36px;
     padding: 0;
     background: transparent;
     border: none;
@@ -241,6 +242,46 @@
     margin: 0 1.25rem 0;
     font-size: 0.82rem;
     color: var(--ifm-color-danger, #e03030);
+  }
+  
+  
+  /* ── Country selector ─────────────────────────────────────────────────── */
+  .countryRow {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1.25rem 0;
+  }
+  
+  .countryLabel {
+    font-size: 0.82rem;
+    color: var(--ifm-color-emphasis-700);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .countrySelect {
+    flex: 1;
+    padding: 0.38rem 0.55rem;
+    font-size: 0.85rem;
+    background: var(--ifm-background-color);
+    color: var(--ifm-font-color-base);
+    border: 1px solid var(--ifm-color-emphasis-400);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: border-color 150ms ease;
+  }
+  
+  .countrySelect:focus {
+    outline: none;
+    border-color: var(--ifm-color-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ifm-color-primary) 25%, transparent);
+  }
+  
+  .countryHint {
+    margin: 0.35rem 1.25rem 0;
+    font-size: 0.75rem;
+    color: var(--ifm-color-emphasis-500);
   }
   
   .checkoutBtn {

@@ -219,16 +219,19 @@ export default function ProductDetail({ config }: { config: string }): ReactNode
     setTimeout(() => setAdded(false), 1800);
   }, [data, selectedVariantId]);
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (country: string) => {
     if (!data) return;
     setLoading(true);
     setCheckoutErr(null);
-    const endpoint = data.checkoutEndpoint ?? '/api/create-checkout-session';
+    const endpoint = data.checkoutEndpoint ?? 'https://super-glade-5406.bauermeistermarkusdev.workers.dev/';
     try {
       const res = await fetch(endpoint, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ lineItems: cart.map(({ item, quantity }) => ({ itemId: item.id, quantity })) }),
+        body:    JSON.stringify({
+          lineItems: cart.map(({ item, quantity }) => ({ itemId: item.id, quantity })),
+          country,
+        }),
       });
       if (!res.ok) throw new Error(await res.text() || `Server error ${res.status}`);
       const { url } = await res.json();

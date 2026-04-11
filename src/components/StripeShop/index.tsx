@@ -31,10 +31,11 @@ import {
   CART_STORAGE_KEY,
   loadCart, saveCart, clearCart,
   cartAdd, cartUpdate, cartRemove,
-  cartTotalPrice, formatPrice, parsePrice,
+  cartTotalPrice, formatPrice, parsePrice, loadCountry, saveCountry,
 } from './cart';
 import { parseYaml, type YamlMap } from './yaml';
 import { CartItemName } from './CartDisplay';
+import { SHIPPING_COUNTRIES } from './countries';
 
 export type { ShopItem } from './types';
 export type { CartEntry } from './cart';
@@ -107,11 +108,13 @@ function CartDrawer({ cart, currency, onUpdateQty, onRemove, onCheckout, loading
   currency:    string;
   onUpdateQty: (id: string, delta: number) => void;
   onRemove:    (id: string) => void;
-  onCheckout:  () => void;
+  onCheckout:  (country: string) => void;
   loading:     boolean;
   error:       string | null;
   onClose:     () => void;
 }): ReactNode {
+  const [country, setCountry] = React.useState(() => loadCountry());
+
   return (
     <div className={styles.drawerBackdrop} onClick={onClose}>
       <div className={styles.drawer} onClick={e => e.stopPropagation()}
@@ -158,11 +161,35 @@ function CartDrawer({ cart, currency, onUpdateQty, onRemove, onCheckout, loading
               <span className={styles.totalValue}>{cartTotalPrice(cart, currency)}</span>
             </div>
 
+            <div className={styles.countryRow}>
+              <label htmlFor="cart-country" className={styles.countryLabel}>
+                Ship to
+              </label>
+              <select
+                id="cart-country"
+                className={styles.countrySelect}
+                value={country}
+                onChange={e => { setCountry(e.target.value); saveCountry(e.target.value); }}
+              >
+                <option value="">— Select country —</option>
+                {SHIPPING_COUNTRIES.map(c => (
+                  <option key={c.code} value={c.code}>{c.label}</option>
+                ))}
+              </select>
+            </div>
+
             {error && <p className={styles.checkoutError} role="alert">{error}</p>}
 
-            <button className={styles.checkoutBtn} onClick={onCheckout} disabled={loading}>
+            <button
+              className={styles.checkoutBtn}
+              onClick={() => onCheckout(country)}
+              disabled={loading || !country}
+            >
               {loading ? 'Redirecting…' : 'Checkout with Stripe'}
             </button>
+            {!country && (
+              <p className={styles.countryHint}>Please select a shipping country to continue.</p>
+            )}
             <p className={styles.checkoutNote}>
               Secure payment powered by Stripe. Google Pay &amp; Apple Pay accepted.
             </p>
@@ -342,14 +369,17 @@ export default function StripeShop({
     setCart(prev => cartRemove(prev, id));
   }, []);
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (country: string) => {
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(endpoint, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ lineItems: cart.map(({ item, quantity }) => ({ itemId: item.id, quantity })) }),
+        body:    JSON.stringify({
+          lineItems: cart.map(({ item, quantity }) => ({ itemId: item.id, quantity })),
+          country,
+        }),
       });
       if (!res.ok) throw new Error(await res.text() || `Server error ${res.status}`);
       const { url } = await res.json();
