@@ -1,0 +1,14 @@
+import React, { useState, useCallback } from 'react';
+import clsx from 'clsx';
+import Heading from '@theme/Heading';
+import styles from './styles.module.css';
+
+      <div className={clsx(styles.wrapper, styles.successWrapper)}>
+        <img src="/img/turtle-shop.svg" width="25%" height="25%"/>
+        <Heading as="h3" className={styles.successTitle}>
+          Order received!
+        </Heading>
+        <p className={styles.successText}>
+          Thanks for shopping with us 😊
+        </p>
+      </div>

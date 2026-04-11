@@ -8,7 +8,7 @@ currency:    chf
 type:        physical
 image:       /img/shop/OceanThrill/box.png
 detailUrl:   /product-detail/oceanthrill-box
-description: A soft ferret friend for your desk.
+description: A classic big box release for your collection. Just like in the 1990s.
 
 images:
   - /img/shop/OceanThrill/box.png
@@ -17,31 +17,25 @@ images:
   - /img/shop/OceanThrill/3.png
 
 body: |
-  ## About this product
+  ## In this adventure, worse things await you than being eaten by a grue.
 
-  Hand-sewn from organic cotton and filled with hypoallergenic stuffing,
-  the Happy Ferret Plushie is the perfect companion for retro gaming sessions.
+  A missing submersible, a group of rich adventurers who vanished on the way to the wreck of the RMS Lusitania and, on top of it all, the Interim CEO of OceanThrill (owner and operator of the missing Kepler 1 sub) murdered at his own private beachfront.
 
-  Each plushie is individually quality-checked and ships in a branded box
-  with a collector card.
+  This is the plot of Happy Ferret Entertainment's first in an upcoming series of mystery adventure games, presented in glorious 8 and 16 bit.
 
-  ### Care instructions
-
-  - Surface wash only
-  - Do not tumble dry
-  - Suitable for ages 3+
+  In this interactive fiction in the tradition of past text adventure (sic) greats, you follow in the footsteps of a weary yet witty detective and his adorably mouthy female partner as they uncover a deep web of lies, intrigue and subversion.
 
 facts:
-  - label: Material
-    value: Organic cotton
-  - label: Dimensions
-    value: 25 × 18 × 12 cm
-  - label: Age rating
-    value: "3+"
-  - label: Origin
-    value: Made in Switzerland
-  - label: Ships within
-    value: 2–3 business days
+  - label: Contents
+    value: All versions of the game on physical media
+  - label: ‎ 
+    value: A Kepler 1 sub shaped USB flash drive with bonus content
+  - label: ‎
+    value: A full color manual with a metric ton of background information and additional, never before seen, artwork 
+  - label: ‎
+    value: Additional feelies (TBA)
+  - label: Release date
+    value: Christmas 2024
 
 variants:
   - id:    oceanthrill-box-c64
