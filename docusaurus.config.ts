@@ -15,7 +15,7 @@ export type OpeningHours = {
 };
 
 const config: Config = {
-  title: "Welcome to Happy Ferret Entertainment",
+  title: "Happy Ferret Entertainment",
   tagline: "Game development like it's 1990",
   favicon: 'img/favicon.ico',
 
@@ -98,7 +98,7 @@ const config: Config = {
 
   themeConfig: {
     // Replace with your project's social card
-    image: 'img/social.svg',
+    image: 'img/social.png',
     colorMode: {
       respectPrefersColorScheme: true,
     },
