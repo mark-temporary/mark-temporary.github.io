@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xsl" href="atom.xsl"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://happy-ferret.com/blog</id>
-    <title>Welcome to Happy Ferret Entertainment Blog</title>
+    <title>Happy Ferret Entertainment Blog</title>
     <updated>2026-01-01T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://happy-ferret.com/blog"/>
-    <subtitle>Welcome to Happy Ferret Entertainment Blog</subtitle>
+    <subtitle>Happy Ferret Entertainment Blog</subtitle>
     <icon>https://happy-ferret.com/img/favicon.ico</icon>
     <entry>
         <title type="html"><![CDATA[Welcome]]></title>
